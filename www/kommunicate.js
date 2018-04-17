@@ -15,10 +15,10 @@ module.exports = {
     	cordova.exec(successCallback, errorCallback, "KommunicateCordovaPlugin", "launchConversation", []);
     },
     launchParticularConversation: function(data, successCallback, errorCallback) {
-    	cordova.exec(successCallback, errorCallback, "KommunicateCordovaPlugin", "launchParticularConversation", [data]);
+    	cordova.exec(successCallback, errorCallback, "KommunicateCordovaPlugin", "launchParticularConversation", [JSON.stringify(data)]);
     },
     startNewConversation: function(params, successCallback, errorCallback) {
-        cordova.exec(successCallback, errorCallback, "KommunicateCordovaPlugin", "startNewConversation", [params]);
+        cordova.exec(successCallback, errorCallback, "KommunicateCordovaPlugin", "startNewConversation", [JSON.stringify(params)]);
     },
     processPushNotification: function(data, successCallback, errorCallback) {
         cordova.exec(successCallback, errorCallback, "KommunicateCordovaPlugin", "processPushNotification", [JSON.stringify(data)]);

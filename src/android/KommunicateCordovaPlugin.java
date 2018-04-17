@@ -13,6 +13,7 @@ import com.applozic.mobicomkit.feed.ChannelFeedApiResponse;
 import com.applozic.mobicomkit.uiwidgets.conversation.ConversationUIService;
 import com.applozic.mobicommons.json.GsonUtils;
 import com.applozic.mobicommons.people.channel.Channel;
+
 import org.json.JSONObject;
 
 import io.kommunicate.KmConversationResponse;
@@ -58,37 +59,50 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
             });
         } else if (action.equals("registerPushNotification")) {
             PushNotificationTask pushNotificationTask = null;
-            PushNotificationTask.TaskListener listener=  new PushNotificationTask.TaskListener() {
+            PushNotificationTask.TaskListener listener = new PushNotificationTask.TaskListener() {
                 @Override
                 public void onSuccess(RegistrationResponse registrationResponse) {
                     callback.success(GsonUtils.getJsonFromObject(registrationResponse, RegistrationResponse.class));
                 }
+
                 @Override
                 public void onFailure(RegistrationResponse registrationResponse, Exception exception) {
                     callback.error(GsonUtils.getJsonFromObject(registrationResponse, RegistrationResponse.class));
                 }
             };
             pushNotificationTask = new PushNotificationTask(Applozic.getInstance(context).getDeviceRegistrationId(), listener, context);
-            pushNotificationTask.execute((Void)null);
+            pushNotificationTask.execute((Void) null);
         } else if (action.equals("isLoggedIn")) {
             callbackContext.success(String.valueOf(MobiComUserPreference.getInstance(context).isLoggedIn()));
         } else if (action.equals("updatePushNotificationToken")) {
             if (MobiComUserPreference.getInstance(context).isRegistered()) {
                 try {
-                    new RegisterUserClientService(context).updatePushNotificationId(data.getString(0));
-                    callback.success(response);
+                    PushNotificationTask pushNotificationTask = null;
+                    PushNotificationTask.TaskListener listener = new PushNotificationTask.TaskListener() {
+                        @Override
+                        public void onSuccess(RegistrationResponse registrationResponse) {
+                            callback.success(GsonUtils.getJsonFromObject(registrationResponse, RegistrationResponse.class));
+                        }
+
+                        @Override
+                        public void onFailure(RegistrationResponse registrationResponse, Exception exception) {
+                            callback.error(GsonUtils.getJsonFromObject(registrationResponse, RegistrationResponse.class));
+                        }
+                    };
+                    pushNotificationTask = new PushNotificationTask(data.getString(0), listener, context);
+                    pushNotificationTask.execute((Void) null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         } else if (action.equals("launchConversation")) {
-            try{
-            Intent intent = new Intent(context, KMConversationActivity.class);
-            cordova.getActivity().startActivity(intent);
-            callback.success(response);
-         }catch(Exception e){
-            callback.error(e.getMessage());
-          }
+            try {
+                Intent intent = new Intent(context, KMConversationActivity.class);
+                cordova.getActivity().startActivity(intent);
+                callback.success(response);
+            } catch (Exception e) {
+                callback.error(e.getMessage());
+            }
         } else if (action.equals("launchParticularConversation")) {
             try {
                 JSONObject jsonObject = new JSONObject(data.getString(0));
@@ -100,31 +114,31 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
             } catch (Exception e) {
                 callback.error(e.getMessage());
             }
-        }else if(action.equals("logout")){
-           Kommunicate.logout(context, new KMLogoutHandler(){
-            @Override
-            public void onSuccess(Context context) {
-                callback.success(response);
-            }
+        } else if (action.equals("logout")) {
+            Kommunicate.logout(context, new KMLogoutHandler() {
+                @Override
+                public void onSuccess(Context context) {
+                    callback.success(response);
+                }
 
-            @Override
-            public void onFailure(Exception exception) {
-                callback.error(exception.getMessage());
-              }
-           });
+                @Override
+                public void onFailure(Exception exception) {
+                    callback.error(exception.getMessage());
+                }
+            });
         } else if (action.equals("startNewConversation")) {
             try {
                 final JSONObject jsonObject = new JSONObject(data.getString(0));
                 final String agentId = jsonObject.getString("agentId");
                 String botId = jsonObject.getString("botId");
-                Kommunicate.startNewConversation(context, agentId,botId, new KMStartChatHandler(){
+                Kommunicate.startNewConversation(context, agentId, botId, new KMStartChatHandler() {
                     @Override
                     public void onSuccess(final Channel channel, Context context) {
 
                         KmCreateConversationHandler handler = new KmCreateConversationHandler() {
                             @Override
                             public void onSuccess(Context context, KmConversationResponse response) {
-                                callback.success(GsonUtils.getJsonFromObject(channel, Channel.class));
+                                callback.success(channel.getClientGroupId());
                             }
 
                             @Override

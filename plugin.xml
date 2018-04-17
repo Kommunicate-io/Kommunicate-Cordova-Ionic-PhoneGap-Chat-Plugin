@@ -2,9 +2,12 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         id="io.kommunicate.phonegap"
         xmlns:tools="http://schemas.android.com/tools"
-        version="0.8.0">
+        version="0.1.0">
 
   <name>Kommunicate</name>
+
+  <dependency id="cordova-plugin-cocoapod-support"/>
+  <dependency id="cordova-plugin-swift-support"/>
 
   <engines>
     <engine name="cordova" version=">=3.4.0"/>
@@ -288,42 +291,42 @@
 
   <platform name="ios">
 
-    <config-file target="config.xml" parent="/widget">
+  <pods-config ios-min-version="9.0" use-frameworks="true"/>
+  <pod name="Kommunicate" version="0.2.0" />
+
+    <config-file target="config.xml" parent="/*">
       <feature name="KommunicateCordovaPlugin">
         <param name="ios-package" value="KommunicateCordovaPlugin" />
       </feature>
     </config-file>
 
-    <config-file target="*-Info.plist" parent="CFBundleURLTypes">
-      <array>
-          <dict>
-              <key>NSCameraUsageDescription</key>
-              <string>Allow Camera</string>
-              <key>NSContactsUsageDescription</key>
-              <string>Allow Contacts</string>
-              <key>NSLocationWhenInUseUsageDescription</key>
-              <string>Allow location sharing!!</string>
-              <key>NSMicrophoneUsageDescription</key>
-              <string>Allow MicroPhone</string>
-              <key>NSPhotoLibraryUsageDescription</key>
-              <string>Allow Photos</string>
-          </dict>
-      </array>
-    </config-file>
-
-    <header-file src="src/ios/KommunicateCordovaPlugin.h" target-dir="KommunicatePlugin"/>
-    <source-file src="src/ios/KommunicateCordovaPlugin.m" target-dir="KommunicatePlugin"/>
-
-    <header-file src="src/ios/ALChatManager.h" target-dir="KommunicatePlugin"/>
-    <source-file src="src/ios/ALChatManager.m" target-dir="KommunicatePlugin"/>
+<key>NSCameraUsageDescription</key>
+<string>Allow Camera</string>
+<key>NSContactsUsageDescription</key>
+<string>Allow Contacts</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Allow location sharing!!</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>Allow MicroPhone</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Allow Photos</string>
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>Allow write access</string>
+    <!-- <pod name="Applozic" /> -->
 
    <!-- <framework src="Applozic" type="podspec" spec="~> 3.9" /> -->
-   <framework src="src/ios/Kommunicate.framework" custom="true" embed="true" />
+<!--   <framework src="Kommunicate" type="podspec" spec="0.2.0"/>-->
 
+   <!-- <header-file src="src/ios/KommunicateCordovaPlugin.h" target-dir="KommunicatePlugin"/>
+   <source-file src="src/ios/KommunicateCordovaPlugin.m" target-dir="KommunicatePlugin"/> -->
+
+   <!-- <source-file src="src/ios/KommunicateCordovaPlugin.h"/>
+   <source-file src="src/ios/KommunicateCordovaPlugin.m"/> -->
+   <source-file src="src/ios/KommunicateCordovaPlugin.swift"/>
   </platform>
 
   <platform name="wp7">
-    <source-file src="src/wp7/Applozic.cs"/>
+    <source-file src="src/wp7/Kommunicate.cs"/>
   </platform>
 
 </plugin>
