@@ -1,3 +1,13 @@
+### Kommunicate Cordova (Ionic/PhoneGap) Chat SDK for Customer Support https://www.kommunicate.io/
+
+Open Source Cordova Live Chat SDK for Ionic and PhoneGap apps
+
+# Overview
+Kommunicate provides open source live chat sdk in cordova which works with both Ionic and PhoneGap apps. Kommunicate lets you add real time live chat, in-app messaging and bot integration in your mobile applications and website for customer support.
+
+Signup at [https://dashboard.kommunicate.io/signup](https://dashboard.kommunicate.io/signup?utm_source=github&utm_medium=readme&utm_campaign=cordova) to get the Application ID.
+
+
 # Kommunicate-Cordova-Ionic-PhoneGap-Chat-Plugin
 Kommunicate plugin for Ionic/Phonegap/Cordova
 
