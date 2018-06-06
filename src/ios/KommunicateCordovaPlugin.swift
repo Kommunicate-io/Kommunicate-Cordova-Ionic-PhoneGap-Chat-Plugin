@@ -92,21 +92,12 @@ import Kommunicate
         )
         
         let jsonStr = command.arguments[0] as? String ?? ""
-        //let jsonStr = "{\"groupId\" : \"8506943\", \"takeOrder\" : true}"
         
         let data = jsonStr.data(using: .utf8)!
         let json = try? JSONSerialization.jsonObject(with: data, options: [])
         
-        if let dict = json as? [String : Any]{
-            guard let gId = dict["groupId"] as? String else{
-                print("Reytum","Empty id")
-                return
-            }
-            print("Reytum ", gId)
-        }
-        
         if let dictionary = json as? [String : Any]{
-            guard let groupId = dictionary["groupId"] as? String else{
+            guard let groupId = dictionary["clientChannelKey"] as? String else{
                 pluginResult = CDVPluginResult(
                     status: CDVCommandStatus_ERROR,
                     messageAs: "Failed")
@@ -148,7 +139,7 @@ import Kommunicate
         let json = try? JSONSerialization.jsonObject(with: data,options: [])
         
         if let dictionary = json as? [String: Any]{
-            guard let agentId = dictionary["agentId"] as? String else {
+            guard let agentId = dictionary["agentIds"] as? [String] else {
                 pluginResult = CDVPluginResult(
                     status: CDVCommandStatus_ERROR,
                     messageAs: "Error, agent id must not be empty")
@@ -159,11 +150,64 @@ import Kommunicate
                 )
                 return
             }
-            let botId = dictionary["botId"] as? String
-            let botIds = (botId != nil) ? [botId!]:nil
+            let botIds = dictionary["botIds"] as? [String]
+            //let botIds = (botId != nil) ? [botId!]:nil
             Kommunicate.createConversation(userId: "",
-                                           agentId: agentId,
+                                           agentId: agentId[0],
                                            botIds: botIds,
+                                           completion: {response in guard !response.isEmpty else{
+                                            pluginResult = CDVPluginResult(
+                                                status: CDVCommandStatus_ERROR,
+                                                messageAs: "Error")
+                                            
+                                            self.commandDelegate!.send(
+                                                pluginResult,
+                                                callbackId: command.callbackId
+                                            )
+                                            return
+                                            }
+                                            
+                                            pluginResult = CDVPluginResult(
+                                                status: CDVCommandStatus_OK,
+                                                messageAs: response)
+                                            
+                                            self.commandDelegate!.send(
+                                                pluginResult,
+                                                callbackId: command.callbackId
+                                            )
+            })}
+    }
+    
+    @objc (startOrGetConversation:)
+    func startOrGetConversation(command: CDVInvokedUrlCommand){
+        var pluginResult = CDVPluginResult(
+            status: CDVCommandStatus_ERROR
+        )
+        
+        let jsonStr = command.arguments[0] as? String ?? ""
+        
+        
+        let data = jsonStr.data(using: .utf8)!
+        let json = try? JSONSerialization.jsonObject(with: data,options: [])
+        
+        if let dictionary = json as? [String: Any]{
+            guard let agentId = dictionary["agentIds"] as? [String] else {
+                pluginResult = CDVPluginResult(
+                    status: CDVCommandStatus_ERROR,
+                    messageAs: "Error, agent id must not be empty")
+                
+                self.commandDelegate!.send(
+                    pluginResult,
+                    callbackId: command.callbackId
+                )
+                return
+            }
+            let botIds = dictionary["botIds"] as? [String]
+            //let botIds = (botId != nil) ? [botId!]:nil
+            Kommunicate.createConversation(userId: "",
+                                           agentId: agentId[0],
+                                           botIds: botIds,
+                                           useLastConversation: true,
                                            completion: {response in guard !response.isEmpty else{
                                             pluginResult = CDVPluginResult(
                                                 status: CDVCommandStatus_ERROR,
@@ -204,9 +248,14 @@ import Kommunicate
             callbackId: command.callbackId
         )
     }
+
+    @objc (registerPushNotification:)
+    func registerPushNotification(command: CDVInvokedUrlCommand){
+
+    }
 }
 
-extension UIApplication {
+extension UIApplication { 
     class func topViewController(controller: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
         if let navigationController = controller as? UINavigationController {
             return topViewController(controller: navigationController.visibleViewController)

@@ -48,7 +48,8 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAv1wf5eMyErPaU3l8EnMUmOsoYJ2joC70" />
 
-        <service android:name="io.kommunicate.phonegap.notification.FcmListenerService">
+        <service android:name="io.kommunicate.phonegap.notification.FcmListenerService"
+                 android:stopWithTask="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
@@ -208,25 +209,12 @@
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <service
-            android:name="com.applozic.mobicomkit.api.notification.NotificationIntentService"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
-        <service
             android:name="com.applozic.mobicomkit.api.conversation.ConversationIntentService"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <service
             android:name="org.eclipse.paho.android.service.MqttService" />
-
-        <service
-            android:name="com.applozic.mobicomkit.uiwidgets.notification.PushNotificationJobService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
-            </intent-filter>
-        </service>
 
         <receiver
             android:name="com.applozic.mobicomkit.broadcast.TimeChangeBroadcastReceiver">
@@ -292,7 +280,7 @@
   <platform name="ios">
 
   <pods-config ios-min-version="9.0" use-frameworks="true"/>
-  <pod name="Kommunicate" version="0.2.0" />
+  <pod name="Kommunicate" version="0.5.0" />
 
     <config-file target="config.xml" parent="/*">
       <feature name="KommunicateCordovaPlugin">
@@ -300,28 +288,47 @@
       </feature>
     </config-file>
 
-<key>NSCameraUsageDescription</key>
-<string>Allow Camera</string>
-<key>NSContactsUsageDescription</key>
-<string>Allow Contacts</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>Allow location sharing!!</string>
-<key>NSMicrophoneUsageDescription</key>
-<string>Allow MicroPhone</string>
-<key>NSPhotoLibraryUsageDescription</key>
-<string>Allow Photos</string>
-<key>NSPhotoLibraryAddUsageDescription</key>
-<string>Allow write access</string>
-    <!-- <pod name="Applozic" /> -->
+ <config-file
+            parent="NSCameraUsageDescription"
+            target="*-Info.plist">
+            <string>Allow Camera</string>
+        </config-file>
 
-   <!-- <framework src="Applozic" type="podspec" spec="~> 3.9" /> -->
-<!--   <framework src="Kommunicate" type="podspec" spec="0.2.0"/>-->
 
-   <!-- <header-file src="src/ios/KommunicateCordovaPlugin.h" target-dir="KommunicatePlugin"/>
-   <source-file src="src/ios/KommunicateCordovaPlugin.m" target-dir="KommunicatePlugin"/> -->
+        <config-file
+            parent="NSPhotoLibraryAddUsageDescription"
+            target="*-Info.plist">
+            <string>Allow Write</string>
+        </config-file>
 
-   <!-- <source-file src="src/ios/KommunicateCordovaPlugin.h"/>
-   <source-file src="src/ios/KommunicateCordovaPlugin.m"/> -->
+
+        <config-file
+            parent="NSContactsUsageDescription"
+            target="*-Info.plist">
+            <string>Allow Contacts</string>
+        </config-file>
+
+
+        <config-file
+            parent="NSLocationWhenInUseUsageDescription"
+            target="*-Info.plist">
+            <string>Allow location sharing</string>
+        </config-file>
+
+
+        <config-file
+            parent="NSMicrophoneUsageDescription"
+            target="*-Info.plist">
+            <string>Allow MicroPhone</string>
+        </config-file>
+
+
+        <config-file
+            parent="NSPhotoLibraryUsageDescription"
+            target="*-Info.plist">
+            <string>Allow Photos</string>
+        </config-file>
+  
    <source-file src="src/ios/KommunicateCordovaPlugin.swift"/>
   </platform>
 

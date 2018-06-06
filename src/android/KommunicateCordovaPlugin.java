@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.applozic.mobicomkit.Applozic;
-import com.applozic.mobicomkit.api.MobiComKitClientService;
-import com.applozic.mobicomkit.api.account.register.RegisterUserClientService;
 import com.applozic.mobicomkit.api.account.register.RegistrationResponse;
 import com.applozic.mobicomkit.api.account.user.MobiComUserPreference;
 import com.applozic.mobicomkit.api.account.user.PushNotificationTask;
@@ -13,23 +11,25 @@ import com.applozic.mobicomkit.feed.ChannelFeedApiResponse;
 import com.applozic.mobicomkit.uiwidgets.conversation.ConversationUIService;
 import com.applozic.mobicommons.json.GsonUtils;
 import com.applozic.mobicommons.people.channel.Channel;
+import com.applozic.mobicomkit.api.notification.MobiComPushReceiver;
+import com.applozic.mobicomkit.uiwidgets.async.AlChannelInfoTask;
 
 import org.json.JSONObject;
 
-import io.kommunicate.KmConversationResponse;
 import io.kommunicate.Kommunicate;
-import io.kommunicate.async.KmCreateConversationTask;
 import io.kommunicate.callbacks.KMLoginHandler;
 import io.kommunicate.callbacks.KMStartChatHandler;
 import io.kommunicate.users.KMUser;
 import io.kommunicate.callbacks.KMLogoutHandler;
-import io.kommunicate.callbacks.KmCreateConversationHandler;
 import io.kommunicate.activities.KMConversationActivity;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.json.JSONArray;
 import org.json.JSONException;
+
+import java.util.List;
+import java.util.Map;
 
 public class KommunicateCordovaPlugin extends CordovaPlugin {
 
@@ -105,12 +105,31 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
             }
         } else if (action.equals("launchParticularConversation")) {
             try {
-                JSONObject jsonObject = new JSONObject(data.getString(0));
-                Intent intent = new Intent(context, KMConversationActivity.class);
-                intent.putExtra(ConversationUIService.GROUP_ID, jsonObject.getInt("groupId"));
-                intent.putExtra(ConversationUIService.TAKE_ORDER, jsonObject.getBoolean("takeOrder")); //Skip chat list for showing on back press
-                context.startActivity(intent);
-                callback.success(response);
+                final JSONObject jsonObject = new JSONObject(data.getString(0));
+                AlChannelInfoTask.ChannelInfoListener listener = new AlChannelInfoTask.ChannelInfoListener() {
+                    @Override
+                    public void onSuccess(AlChannelInfoTask.ChannelInfoModel channelInfoModel, String response, Context context) {
+                        Intent intent = new Intent(context, KMConversationActivity.class);
+                        intent.putExtra(ConversationUIService.GROUP_ID, channelInfoModel.getChannel().getKey());
+                        try {
+                            intent.putExtra(ConversationUIService.TAKE_ORDER, jsonObject.getBoolean("takeOrder")); //Skip chat list for showing on back press
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        context.startActivity(intent);
+                        callback.success(response);
+                    }
+
+                    @Override
+                    public void onFailure(String response, Exception e, Context context) {
+                        if (response != null) {
+                            callback.error(response);
+                        } else if (e != null) {
+                            callback.error(e.getMessage());
+                        }
+                    }
+                };
+                new AlChannelInfoTask(context, null, jsonObject.getString("clientChannelKey"), false, listener).execute();
             } catch (Exception e) {
                 callback.error(e.getMessage());
             }
@@ -129,24 +148,48 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
         } else if (action.equals("startNewConversation")) {
             try {
                 final JSONObject jsonObject = new JSONObject(data.getString(0));
-                final String agentId = jsonObject.getString("agentId");
-                String botId = jsonObject.getString("botId");
-                Kommunicate.startNewConversation(context, agentId, botId, new KMStartChatHandler() {
-                    @Override
-                    public void onSuccess(final Channel channel, Context context) {
+                String groupName = null;
+                try {
+                    groupName = jsonObject.getString("groupName");
+                } catch (Exception e) {
+                }
+                final List<String> agentIds = (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("agentIds"), List.class);
+                final List<String> botIds = (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("botIds"), List.class);
 
-                        KmCreateConversationHandler handler = new KmCreateConversationHandler() {
+                Kommunicate.startNewConversation(context,
+                        groupName,
+                        agentIds,
+                        botIds,
+                        false,
+                        new KMStartChatHandler() {
                             @Override
-                            public void onSuccess(Context context, KmConversationResponse response) {
+                            public void onSuccess(Channel channel, Context context) {
                                 callback.success(channel.getClientGroupId());
                             }
 
                             @Override
-                            public void onFailure(Context context, Exception e, String error) {
-                                callback.error(e == null ? error : e.getMessage());
+                            public void onFailure(ChannelFeedApiResponse channelFeedApiResponse, Context context) {
+                                callback.error(GsonUtils.getJsonFromObject(channelFeedApiResponse, ChannelFeedApiResponse.class));
                             }
-                        };
-                        new KmCreateConversationTask(context, channel.getKey(), MobiComUserPreference.getInstance(context).getUserId(), MobiComKitClientService.getApplicationKey(context), agentId, handler).execute();
+                        });
+            } catch (Exception e) {
+                callback.error(e.getMessage());
+            }
+        } else if (action.equals("startOrGetConversation")) {
+            try {
+                final JSONObject jsonObject = new JSONObject(data.getString(0));
+                String groupName = null;
+                try {
+                    groupName = jsonObject.getString("groupName");
+                } catch (Exception e) {
+                }
+                final List<String> agentIds = (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("agentIds"), List.class);
+                final List<String> botIds = (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("botIds"), List.class);
+
+                Kommunicate.startOrGetConversation(context, groupName, agentIds, botIds, new KMStartChatHandler() {
+                    @Override
+                    public void onSuccess(Channel channel, Context context) {
+                        callback.success(channel.getClientGroupId());
                     }
 
                     @Override
@@ -155,7 +198,16 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                     }
                 });
             } catch (Exception e) {
-                callback.error(e.getMessage());
+
+            }
+        } else if (action.equals("processPushNotification")) {
+            try {
+                Map<String, String> pushData = (Map) GsonUtils.getObjectFromJson(data.getString(0), Map.class);
+                if (MobiComPushReceiver.isMobiComPushNotification(pushData)) {
+                    MobiComPushReceiver.processMessageAsync(context, pushData);
+                }
+            } catch (Exception e) {
+
             }
         } else {
             return false;

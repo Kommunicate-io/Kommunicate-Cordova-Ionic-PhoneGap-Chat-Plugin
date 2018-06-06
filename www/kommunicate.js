@@ -20,6 +20,9 @@ module.exports = {
     startNewConversation: function(params, successCallback, errorCallback) {
         cordova.exec(successCallback, errorCallback, "KommunicateCordovaPlugin", "startNewConversation", [JSON.stringify(params)]);
     },
+    startOrGetConversation: function(params, successCallback, errorCallback){
+        cordova.exec(successCallback, errorCallback, "KommunicateCordovaPlugin", "startOrGetConversation", [JSON.stringify(params)]);
+    },
     processPushNotification: function(data, successCallback, errorCallback) {
         cordova.exec(successCallback, errorCallback, "KommunicateCordovaPlugin", "processPushNotification", [JSON.stringify(data)]);
     },
