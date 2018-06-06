@@ -1,6 +1,6 @@
 {
   "name": "Kommunicate-Cordova-Ionic-PhoneGap-Chat-Plugin",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Kommunicate-Cordova-Ionic-PhoneGap-Chat-Plugin",
   "cordova": {
     "id": "io.kommunicate.phonegap",
