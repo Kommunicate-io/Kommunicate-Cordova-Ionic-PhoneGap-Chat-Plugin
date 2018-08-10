@@ -75,7 +75,7 @@ You can open an individual chat thread by calling the below function and passing
 
 ```
 let convObj = {
-        'groupId' : groupId, //pass the groupId here
+        'clientChannelKey' : groupId, //pass the groupId here
         'takeOrder' : true //skip chat list on back press, pass false if you want to show chat list on back press
       };
       
@@ -92,8 +92,8 @@ You can start a new conversation by using the below function:
 
 ```
  let convInfo = {
-      'agentId':'reytum@live.com',
-      'botId': 'Hotel-Booking-Assistant'
+      'agentIds':['reytum@live.com'],  //Array of agentIds
+      'botIds': ['Hotel-Booking-Assistant'] .  //Array of botIds
      };
      
   kommunicate.startNewConversation(convInfo, (response) => {
