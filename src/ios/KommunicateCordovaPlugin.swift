@@ -110,10 +110,19 @@ import Kommunicate
             }
             
             if let top = UIApplication.topViewController(){
-                Kommunicate.showConversationWith(groupId: groupId, from: top)
-                pluginResult = CDVPluginResult(
-                    status: CDVCommandStatus_OK,
-                    messageAs: "Success")
+                Kommunicate.showConversationWith(groupId: groupId, from: top, completionHandler: {
+                  success in
+                    if success{
+                    pluginResult = CDVPluginResult(
+                        status: CDVCommandStatus_OK,
+                        messageAs: "Success")
+                        
+                    }else{
+                        pluginResult = CDVPluginResult(
+                            status: CDVCommandStatus_OK,
+                            messageAs: "Success")
+                    }
+                })
             }else{
                 pluginResult = CDVPluginResult(
                     status: CDVCommandStatus_ERROR,
@@ -153,7 +162,7 @@ import Kommunicate
             let botIds = dictionary["botIds"] as? [String]
             //let botIds = (botId != nil) ? [botId!]:nil
             Kommunicate.createConversation(userId: "",
-                                           agentId: agentId[0],
+                                           agentIds: agentId,
                                            botIds: botIds,
                                            completion: {response in guard !response.isEmpty else{
                                             pluginResult = CDVPluginResult(
@@ -205,7 +214,7 @@ import Kommunicate
             let botIds = dictionary["botIds"] as? [String]
             //let botIds = (botId != nil) ? [botId!]:nil
             Kommunicate.createConversation(userId: "",
-                                           agentId: agentId[0],
+                                           agentIds: agentId,
                                            botIds: botIds,
                                            useLastConversation: true,
                                            completion: {response in guard !response.isEmpty else{

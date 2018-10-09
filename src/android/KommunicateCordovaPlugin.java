@@ -2,12 +2,15 @@ package io.kommunicate.phonegap;
 
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
 
 import com.applozic.mobicomkit.Applozic;
 import com.applozic.mobicomkit.api.account.register.RegistrationResponse;
 import com.applozic.mobicomkit.api.account.user.MobiComUserPreference;
 import com.applozic.mobicomkit.api.account.user.PushNotificationTask;
 import com.applozic.mobicomkit.feed.ChannelFeedApiResponse;
+import com.applozic.mobicomkit.uiwidgets.async.AlChannelCreateAsyncTask;
+import com.applozic.mobicomkit.uiwidgets.async.AlGroupInformationAsyncTask;
 import com.applozic.mobicomkit.uiwidgets.conversation.ConversationUIService;
 import com.applozic.mobicommons.json.GsonUtils;
 import com.applozic.mobicommons.people.channel.Channel;
@@ -16,6 +19,8 @@ import com.applozic.mobicomkit.uiwidgets.async.AlChannelInfoTask;
 
 import org.json.JSONObject;
 
+import io.kommunicate.KMGroupInfo;
+import io.kommunicate.KmException;
 import io.kommunicate.Kommunicate;
 import io.kommunicate.callbacks.KMLoginHandler;
 import io.kommunicate.callbacks.KMStartChatHandler;
@@ -28,6 +33,10 @@ import org.apache.cordova.CordovaPlugin;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -154,7 +163,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                 } catch (Exception e) {
                 }
                 final List<String> agentIds = (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("agentIds"), List.class);
-                final List<String> botIds = (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("botIds"), List.class);
+                final List<String> botIds = jsonObject.has("botIds") ? (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("botIds"), List.class) : null;
 
                 Kommunicate.startNewConversation(context,
                         groupName,
@@ -178,27 +187,49 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
         } else if (action.equals("startOrGetConversation")) {
             try {
                 final JSONObject jsonObject = new JSONObject(data.getString(0));
-                String groupName = null;
-                try {
-                    groupName = jsonObject.getString("groupName");
-                } catch (Exception e) {
-                }
-                final List<String> agentIds = (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("agentIds"), List.class);
-                final List<String> botIds = (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("botIds"), List.class);
 
-                Kommunicate.startOrGetConversation(context, groupName, agentIds, botIds, new KMStartChatHandler() {
+                final List<String> agentIds = (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("agentIds"), List.class);
+                final List<String> botIds = jsonObject.has("botIds") ? (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("botIds"), List.class) : null;
+
+                String clientGroupId = getClientGroupId(MobiComUserPreference.getInstance(context).getUserId(), agentIds, botIds);
+
+                AlGroupInformationAsyncTask.GroupMemberListener groupMemberListener = new AlGroupInformationAsyncTask.GroupMemberListener() {
                     @Override
                     public void onSuccess(Channel channel, Context context) {
-                        callback.success(channel.getClientGroupId());
+                        if (channel != null) {
+                            callback.success(channel.getClientGroupId());
+                        }
                     }
 
                     @Override
-                    public void onFailure(ChannelFeedApiResponse channelFeedApiResponse, Context context) {
-                        callback.error(GsonUtils.getJsonFromObject(channelFeedApiResponse, ChannelFeedApiResponse.class));
-                    }
-                });
-            } catch (Exception e) {
+                    public void onFailure(Channel channel, Exception e, Context context) {
+                        try {
+                            String groupName = null;
+                            try {
+                                groupName = jsonObject.getString("groupName");
+                            } catch (Exception e1) {
+                            }
 
+                            startNewConversation(context, groupName, agentIds, botIds, true, new KMStartChatHandler() {
+                                @Override
+                                public void onSuccess(Channel channel, Context context) {
+                                    callback.success(channel.getClientGroupId());
+                                }
+
+                                @Override
+                                public void onFailure(ChannelFeedApiResponse channelFeedApiResponse, Context context) {
+                                    callback.error(GsonUtils.getJsonFromObject(channelFeedApiResponse, ChannelFeedApiResponse.class));
+                                }
+                            });
+                        } catch (KmException e1) {
+                            callback.error(e1.getMessage());
+                        }
+                    }
+                };
+
+                new AlGroupInformationAsyncTask(context, clientGroupId, groupMemberListener).execute();
+            } catch (Exception e) {
+               callback.error(e.getMessage());
             }
         } else if (action.equals("processPushNotification")) {
             try {
@@ -214,5 +245,110 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
         }
 
         return true;
+    }
+
+    public static void startNewConversation(Context context, String groupName, List<String> agentIds, List<String> botIds, boolean isUniqueChat, KMStartChatHandler handler) throws KmException {
+        List<KMGroupInfo.GroupUser> users = new ArrayList<KMGroupInfo.GroupUser>();
+
+        KMGroupInfo channelInfo = new KMGroupInfo(TextUtils.isEmpty(groupName) ? "Kommunicate Support" : groupName, new ArrayList<String>());
+
+        if (agentIds == null || agentIds.isEmpty()) {
+            throw new KmException("Agent Id list cannot be null or empty");
+        }
+        for (String agentId : agentIds) {
+            users.add(channelInfo.new GroupUser().setUserId(agentId).setGroupRole(1));
+        }
+
+        users.add(channelInfo.new GroupUser().setUserId("bot").setGroupRole(2));
+        users.add(channelInfo.new GroupUser().setUserId(MobiComUserPreference.getInstance(context).getUserId()).setGroupRole(3));
+
+        if (botIds != null) {
+            for (String botId : botIds) {
+                if (botId != null && !"bot".equals(botId)) {
+                    users.add(channelInfo.new GroupUser().setUserId(botId).setGroupRole(2));
+                }
+            }
+        }
+
+        channelInfo.setType(10);
+        channelInfo.setUsers(users);
+
+        if (!agentIds.isEmpty()) {
+            channelInfo.setAdmin(agentIds.get(0));
+        }
+
+        if (isUniqueChat) {
+            channelInfo.setClientGroupId(getClientGroupId(MobiComUserPreference.getInstance(context).getUserId(), agentIds, botIds));
+        }
+
+        Map<String, String> metadata = new HashMap<String, String>();
+        metadata.put("CREATE_GROUP_MESSAGE", "");
+        metadata.put("REMOVE_MEMBER_MESSAGE", "");
+        metadata.put("ADD_MEMBER_MESSAGE", "");
+        metadata.put("JOIN_MEMBER_MESSAGE", "");
+        metadata.put("GROUP_NAME_CHANGE_MESSAGE", "");
+        metadata.put("GROUP_ICON_CHANGE_MESSAGE", "");
+        metadata.put("GROUP_LEFT_MESSAGE", "");
+        metadata.put("DELETED_GROUP_MESSAGE", "");
+        metadata.put("GROUP_USER_ROLE_UPDATED_MESSAGE", "");
+        metadata.put("GROUP_META_DATA_UPDATED_MESSAGE", "");
+        metadata.put("HIDE", "true");
+
+        channelInfo.setMetadata(metadata);
+
+        if (handler == null) {
+            handler = new KMStartChatHandler() {
+                @Override
+                public void onSuccess(Channel channel, Context context) {
+
+                }
+
+                @Override
+                public void onFailure(ChannelFeedApiResponse channelFeedApiResponse, Context context) {
+
+                }
+            };
+        }
+
+        new AlChannelCreateAsyncTask(context, channelInfo, handler).execute();
+    }
+
+    private static String getClientGroupId(String userId, List<String> agentIds, List<String> botIds) throws KmException {
+
+        if (agentIds == null || agentIds.isEmpty()) {
+            throw new KmException("Please add at-least one Agent");
+        }
+
+        Collections.sort(agentIds);
+
+        List<String> tempList = new ArrayList<String>(agentIds);
+        tempList.add(userId);
+
+        if (botIds != null && !botIds.isEmpty()) {
+            if (botIds.contains("bot")) {
+                botIds.remove("bot");
+            }
+            Collections.sort(botIds);
+            tempList.addAll(botIds);
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        Iterator<String> iterator = tempList.iterator();
+
+        while (iterator.hasNext()) {
+            String temp = iterator.next();
+            sb.append(temp);
+
+            if (!temp.equals(tempList.get(tempList.size() - 1))) {
+                sb.append("_");
+            }
+        }
+
+        if (sb.toString().length() > 255) {
+            throw new KmException("Please reduce the number of agents or bots");
+        }
+
+        return sb.toString();
     }
 }
