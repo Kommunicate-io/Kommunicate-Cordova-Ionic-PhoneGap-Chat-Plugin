@@ -14,11 +14,11 @@ Kommunicate plugin for Ionic/Phonegap/Cordova
 ## Installation
 You can add the plugin using the below command:
  
-`cordova plugin add https://github.com/Kommunicate-io/Kommunicate-Cordova-Ionic-PhoneGap-Chat-Plugin.git`
+`cordova plugin add kommunicate-cordova-plugin`
 
 For ionic, use the below command:
 
-`ionic cordova plugin add https://github.com/Kommunicate-io/Kommunicate-Cordova-Ionic-PhoneGap-Chat-Plugin.git`
+`ionic cordova plugin add kommunicate-cordova-plugin`
 
 ## Authentication
 
@@ -103,7 +103,33 @@ You can start a new conversation by using the below function:
       console.log("Kommunicate create conversation failed : " + response);
     });
  ```
- 
+## Starting a Unique conversation
+
+You can create a unique conversation using the below method. A unique conversation is identified by the list of agentIds and botIds used to create the conversation. If the same set of Ids are passed to the below method, then the already created conversation would be returned instead of creating a new conversation:
+
+```
+      var vary = {
+        'agentIds':['reytum@live.com'],
+        'botIds' : ['bot1', 'bot2']
+       };
+
+       kommunicate.startOrGetConversation(vary, (response) => {
+        var grpy = {  
+          'clientChannelKey' : response,
+          'takeOrder' : true
+        };
+  
+        kommunicate.launchParticularConversation(grpy, function(response) {
+          console.log("Kommunicate launch success response : " + response);
+        }, function(response) {
+         console.log("Kommunicate launch failure response : " + response);
+        });
+        
+         console.log("Kommunicate create conversation successfull : " + response);
+      },(response) => {
+        console.log("Kommunicate create conversation failed : " + response);
+      });
+```
 ## Logging out the user
 
 You can logout the user from Kommunicate using the below function:
