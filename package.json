@@ -1,9 +1,9 @@
 {
-  "name": "Kommunicate-Cordova-Ionic-PhoneGap-Chat-Plugin",
-  "version": "0.2.0",
-  "description": "Kommunicate-Cordova-Ionic-PhoneGap-Chat-Plugin",
+  "name": "kommunicate-cordova-plugin",
+  "version": "0.3.0",
+  "description": "Kommunicate is a customer communication software for growing businesses for building long-lasting customer relationships that drive growth.",
   "cordova": {
-    "id": "kommunicate-customer-chat-plugin",
+    "id": "kommunicate-cordova-plugin",
     "platforms": [
       "firefoxos",
       "android",
