@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
-        id="kommunicate-customer-chat-plugin"
+        id="kommunicate-cordova-plugin"
         xmlns:tools="http://schemas.android.com/tools"
-        version="0.2.0">
+        version="0.3.0">
 
   <name>Kommunicate</name>
 
@@ -36,12 +36,6 @@
     <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
 
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
-
-    <!--  <meta-data android:name="com.applozic.application.key"
-                 android:value="applozic-sample-app" /> --> <!-- Applozic Application Key -->
-
-    <!--  <meta-data android:name="com.applozic.mobicomkit.notification.smallIcon"
-                 android:resource="@mipmap/icon" /> --> <!-- Launcher white Icon -->
 
       <meta-data
             android:name="com.google.android.geo.API_KEY"
