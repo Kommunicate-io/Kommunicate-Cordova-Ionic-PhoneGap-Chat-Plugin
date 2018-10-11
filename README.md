@@ -113,21 +113,10 @@ You can create a unique conversation using the below method. A unique conversati
         'botIds' : ['bot1', 'bot2']
        };
 
-       kommunicate.startOrGetConversation(vary, (response) => {
-        var grpy = {  
-          'clientChannelKey' : response,
-          'takeOrder' : true
-        };
-  
-        kommunicate.launchParticularConversation(grpy, function(response) {
-          console.log("Kommunicate launch success response : " + response);
-        }, function(response) {
-         console.log("Kommunicate launch failure response : " + response);
-        });
-        
+       kommunicate.startOrGetConversation(vary, (response) => {  
          console.log("Kommunicate create conversation successfull : " + response);
       },(response) => {
-        console.log("Kommunicate create conversation failed : " + response);
+         console.log("Kommunicate create conversation failed : " + response);
       });
 ```
 ## Logging out the user
