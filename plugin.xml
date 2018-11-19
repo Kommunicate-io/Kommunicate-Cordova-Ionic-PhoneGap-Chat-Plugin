@@ -7,7 +7,7 @@
   <name>Kommunicate</name>
 
   <dependency id="cordova-plugin-cocoapod-support"/>
-  <dependency id="cordova-plugin-swift-support"/>
+  <dependency id="cordova-plugin-add-swift-support"/>
 
   <engines>
     <engine name="cordova" version=">=3.4.0"/>
