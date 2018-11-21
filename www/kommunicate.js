@@ -28,5 +28,8 @@ module.exports = {
     },
     logout: function(successCallback, errorCallback) {
     	cordova.exec(successCallback, errorCallback, "KommunicateCordovaPlugin", "logout", []);
+    },
+    startSingleChat: function(data, successCallback, errorCallback) {
+        cordova.exec(successCallback, errorCallback, "KommunicateCordovaPlugin", "startSingleChat", [JSON.stringify(data)]);
     }
 };
