@@ -436,7 +436,7 @@ import Applozic
                 return
             }
             
-            let convViewModel = ALKConversationViewModel(contactId: nil, channelKey: key)
+            let convViewModel = ALKConversationViewModel(contactId: nil, channelKey: key, localizedStringFileName: Kommunicate.defaultConfiguration.localizedStringFileName)
             let conversationViewController = ALKConversationViewController(configuration: Kommunicate.defaultConfiguration)
             
             conversationViewController.title = channel.name
