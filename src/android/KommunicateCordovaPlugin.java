@@ -24,6 +24,7 @@ import io.kommunicate.KmException;
 import io.kommunicate.Kommunicate;
 import io.kommunicate.callbacks.KMLoginHandler;
 import io.kommunicate.callbacks.KMStartChatHandler;
+import io.kommunicate.callbacks.KmCallback;
 import io.kommunicate.users.KMUser;
 import io.kommunicate.callbacks.KMLogoutHandler;
 import io.kommunicate.activities.KMConversationActivity;
@@ -103,6 +104,62 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }
+        } else if (action.equals("startSingleChat")) {
+            try {
+                final JSONObject jsonObject = new JSONObject(data.getString(0));
+                KMUser user = null;
+                String groupName = null;
+                boolean withPrechat = false;
+                boolean isUnique = true;
+                List<String> agentIds = new ArrayList<String>();
+                List<String> botIds;
+
+                if (jsonObject.has("appId")) {
+                    Kommunicate.init(context, jsonObject.getString("appId"));
+                }
+
+                if (jsonObject.has("withPreChat")) {
+                    withPrechat = jsonObject.getBoolean("withPreChat");
+                }
+                if (!withPrechat) {
+                    if (jsonObject.has("kmUser")) {
+                        user = (KMUser) GsonUtils.getObjectFromJson(jsonObject.getString("kmUser"), KMUser.class);
+                    } else {
+                        user = Kommunicate.getVisitor();
+                    }
+                }
+
+                if (jsonObject.has("isUnique")) {
+                    isUnique = jsonObject.getBoolean("isUnique");
+                }
+
+                if (jsonObject.has("agentIds")) {
+                    agentIds = (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("agentIds"), List.class);
+                } else {
+                    callback.error("Agent List is empty. Please pass agentIds paramter");
+                }
+
+                botIds = jsonObject.has("botIds") ? (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("botIds"), List.class) : null;
+
+                if (jsonObject.has("groupName")) {
+                    groupName = jsonObject.getString("groupName");
+                }
+
+                Kommunicate.launchSingleChat(cordova.getActivity(), groupName == null ? "Support" : groupName, user, withPrechat, isUnique, agentIds, botIds, new KmCallback() {
+                    @Override
+                    public void onSuccess(Object message) {
+                        callback.success(message != null ? message.toString() : "Success");
+                    }
+
+                    @Override
+                    public void onFailure(Object error) {
+                        callback.error(error != null ? error.toString() : "Unknown error occurred");
+                    }
+                });
+
+            } catch (Exception e) {
+                callback.error(e.getMessage());
             }
         } else if (action.equals("launchConversation")) {
             try {
@@ -229,7 +286,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
 
                 new AlGroupInformationAsyncTask(context, clientGroupId, groupMemberListener).execute();
             } catch (Exception e) {
-               callback.error(e.getMessage());
+                callback.error(e.getMessage());
             }
         } else if (action.equals("processPushNotification")) {
             try {

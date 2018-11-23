@@ -2,13 +2,13 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         id="kommunicate-cordova-plugin"
         xmlns:tools="http://schemas.android.com/tools"
-        version="0.3.0">
+        version="0.4.1">
 
   <name>Kommunicate</name>
 
+  <dependency id="cordova-plugin-add-swift-support" version="1.7.2"/>
   <dependency id="cordova-plugin-cocoapod-support"/>
-  <dependency id="cordova-plugin-swift-support"/>
-
+  
   <engines>
     <engine name="cordova" version=">=3.4.0"/>
   </engines>
@@ -40,6 +40,11 @@
       <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAv1wf5eMyErPaU3l8EnMUmOsoYJ2joC70" />
+            
+        <activity
+            android:name="io.kommunicate.activities.LeadCollectionActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:theme="@style/ApplozicTheme" />
 
         <service android:name="io.kommunicate.phonegap.notification.FcmListenerService"
                  android:stopWithTask="false">
@@ -59,17 +64,16 @@
   </platform>
 
   <platform name="ios">
+        <pods-config ios-min-version="9.0" use-frameworks="true"/>
+        <pod name="Kommunicate" version="0.11.0"/>
+        
+        <config-file target="config.xml" parent="/*">
+          <feature name="KommunicateCordovaPlugin">
+            <param name="ios-package" value="KommunicateCordovaPlugin" />
+          </feature>
+        </config-file>
 
-  <pods-config ios-min-version="9.0" use-frameworks="true"/>
-  <pod name="Kommunicate" />
-
-    <config-file target="config.xml" parent="/*">
-      <feature name="KommunicateCordovaPlugin">
-        <param name="ios-package" value="KommunicateCordovaPlugin" />
-      </feature>
-    </config-file>
-
- <config-file
+        <config-file
             parent="NSCameraUsageDescription"
             target="*-Info.plist">
             <string>Allow Camera</string>
@@ -110,11 +114,10 @@
             <string>Allow Photos</string>
         </config-file>
   
-   <source-file src="src/ios/KommunicateCordovaPlugin.swift"/>
+    <source-file src="src/ios/KommunicateCordovaPlugin.swift"/>
   </platform>
 
   <platform name="wp7">
     <source-file src="src/wp7/Kommunicate.cs"/>
   </platform>
-
 </plugin>
