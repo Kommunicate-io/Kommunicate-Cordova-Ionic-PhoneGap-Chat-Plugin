@@ -117,30 +117,13 @@ import Applozic
                 return
             }
             
-            if let top = UIApplication.topViewController(){
-                Kommunicate.showConversationWith(groupId: groupId, from: top, completionHandler: {
-                    success in
-                    if success{
-                        pluginResult = CDVPluginResult(
+            self.launchChatWithClientGroupId(clientGroupId: groupId)
+            pluginResult = CDVPluginResult(
                             status: CDVCommandStatus_OK,
                             messageAs: "Success")
-                        
-                    }else{
-                        pluginResult = CDVPluginResult(
-                            status: CDVCommandStatus_ERROR,
-                            messageAs: "Error")
-                    }
-                })
-            }else{
-                pluginResult = CDVPluginResult(
-                    status: CDVCommandStatus_ERROR,
-                    messageAs: "Failed")
-            }
-            
-            self.commandDelegate!.send(
-                pluginResult,
-                callbackId: command.callbackId
-            )}
+                                                        
+            self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
+        }
     }
     
     @objc (startNewConversation:)
