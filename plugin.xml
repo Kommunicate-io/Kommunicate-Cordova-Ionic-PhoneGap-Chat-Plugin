@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         id="kommunicate-cordova-plugin"
         xmlns:tools="http://schemas.android.com/tools"
-        version="0.4.1">
+        version="0.4.2">
 
   <name>Kommunicate</name>
 
