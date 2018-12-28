@@ -215,29 +215,26 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
             try {
                 final JSONObject jsonObject = new JSONObject(data.getString(0));
                 String groupName = null;
+                boolean isUnique = false;
                 try {
                     groupName = jsonObject.getString("groupName");
+                    isUnique = jsonObject.getBoolean("isUnique");
                 } catch (Exception e) {
                 }
-                final List<String> agentIds = (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("agentIds"), List.class);
+                final List<String> agentIds = jsonObject.has("agentIds") ? (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("agentIds"), List.class) : null;
                 final List<String> botIds = jsonObject.has("botIds") ? (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("botIds"), List.class) : null;
 
-                Kommunicate.startNewConversation(context,
-                        groupName,
-                        agentIds,
-                        botIds,
-                        false,
-                        new KMStartChatHandler() {
-                            @Override
-                            public void onSuccess(Channel channel, Context context) {
-                                callback.success(channel.getClientGroupId());
-                            }
+                Kommunicate.startConversation(context, groupName, agentIds, botIds, isUnique, new KMStartChatHandler() {
+                    @Override
+                    public void onSuccess(Channel channel, Context context) {
+                        callback.success(channel.getClientGroupId());
+                    }
 
-                            @Override
-                            public void onFailure(ChannelFeedApiResponse channelFeedApiResponse, Context context) {
-                                callback.error(GsonUtils.getJsonFromObject(channelFeedApiResponse, ChannelFeedApiResponse.class));
-                            }
-                        });
+                    @Override
+                    public void onFailure(ChannelFeedApiResponse channelFeedApiResponse, Context context) {
+                        callback.error(GsonUtils.getJsonFromObject(channelFeedApiResponse, ChannelFeedApiResponse.class));
+                    }
+                });
             } catch (Exception e) {
                 callback.error(e.getMessage());
             }

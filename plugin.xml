@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         id="kommunicate-cordova-plugin"
         xmlns:tools="http://schemas.android.com/tools"
-        version="0.4.2">
+        version="0.4.4">
 
   <name>Kommunicate</name>
 
@@ -40,11 +40,6 @@
       <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAv1wf5eMyErPaU3l8EnMUmOsoYJ2joC70" />
-            
-        <activity
-            android:name="io.kommunicate.activities.LeadCollectionActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:theme="@style/ApplozicTheme" />
 
         <service android:name="io.kommunicate.phonegap.notification.FcmListenerService"
                  android:stopWithTask="false">
@@ -65,7 +60,7 @@
 
   <platform name="ios">
         <pods-config ios-min-version="9.0" use-frameworks="true"/>
-        <pod name="Kommunicate" version="0.11.0"/>
+        <pod name="Kommunicate" version="0.12.0"/>
         
         <config-file target="config.xml" parent="/*">
           <feature name="KommunicateCordovaPlugin">
