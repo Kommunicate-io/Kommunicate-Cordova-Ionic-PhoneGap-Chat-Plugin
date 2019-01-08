@@ -110,6 +110,7 @@
         </config-file>
   
     <source-file src="src/ios/KommunicateCordovaPlugin.swift"/>
+    <header-file src="src/ios/Kommunicate-Bridging-Header.h" />
   </platform>
 
   <platform name="wp7">
