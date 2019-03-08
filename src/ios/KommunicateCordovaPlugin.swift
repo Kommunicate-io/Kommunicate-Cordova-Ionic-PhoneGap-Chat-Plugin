@@ -388,7 +388,7 @@ import Applozic
                             })
                             
                         }else{
-                            let controller = KMPreChatFormViewController()
+                            let controller = KMPreChatFormViewController(configuration: Kommunicate.defaultConfiguration)
                             controller.delegate = self
                             viewController.present(controller, animated: false, completion: nil)
                         }
