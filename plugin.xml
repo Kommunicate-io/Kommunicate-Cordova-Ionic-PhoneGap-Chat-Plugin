@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         id="kommunicate-cordova-plugin"
         xmlns:tools="http://schemas.android.com/tools"
-        version="0.4.5">
+        version="0.4.6">
 
   <name>Kommunicate</name>
 
@@ -60,7 +60,7 @@
 
   <platform name="ios">
         <pods-config ios-min-version="9.0" use-frameworks="true"/>
-        <pod name="Kommunicate" version="0.12.0"/>
+        <pod name="Kommunicate" version="1.1.0"/>
         
         <config-file target="config.xml" parent="/*">
           <feature name="KommunicateCordovaPlugin">
@@ -110,6 +110,7 @@
         </config-file>
   
     <source-file src="src/ios/KommunicateCordovaPlugin.swift"/>
+    <header-file src="src/ios/Kommunicate-Bridging-Header.h" />
   </platform>
 
   <platform name="wp7">
