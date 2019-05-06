@@ -167,7 +167,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
             try {
                 final JSONObject jsonObject = new JSONObject(data.getString(0));
 
-                KmChatBuilder chatBuilder = new KmChatBuilder(context);
+                KmChatBuilder chatBuilder = new KmChatBuilder(cordova.getActivity());
 
                 if (jsonObject.has("appId")) {
                     chatBuilder.setApplicationId(jsonObject.getString("appId"));
@@ -232,6 +232,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                     });
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 callback.error(e.getMessage());
             }
         } else if (action.equals("launchConversation")) {

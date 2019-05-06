@@ -393,17 +393,7 @@ import Applozic
                 let json = try? JSONSerialization.jsonObject(with: data,options: [])
                 
                 if let dictionary = json as? [String: Any]{
-                    guard let agentIds = dictionary["agentIds"] as? [String] else {
-                        pluginResult = CDVPluginResult(
-                            status: CDVCommandStatus_ERROR,
-                            messageAs: "Error, agent id must not be empty")
-                        
-                        self.commandDelegate!.send(
-                            pluginResult,
-                            callbackId: command.callbackId
-                        )
-                        return
-                    }
+                    let agentIds = dictionary["agentIds"] as? [String]
                     let botIds = dictionary["botIds"] as? [String]
                     
                     self.agentIds = agentIds
@@ -423,7 +413,7 @@ import Applozic
                                 jsonSt = "\(jsonSt)"
                                 kmUser = KMUser(jsonString: jsonSt)
                                 kmUser?.applicationId = appId
-                            }else{
+                            }else {
                                 kmUser = KMUser.init()
                                 kmUser?.userId = Kommunicate.randomId()
                                 kmUser?.applicationId = appId
@@ -582,7 +572,7 @@ import Applozic
     }
 }
 
-extension UIApplication { 
+extension UIApplication {
     class func topViewController(controller: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
         if let navigationController = controller as? UINavigationController {
             return topViewController(controller: navigationController.visibleViewController)
