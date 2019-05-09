@@ -31,5 +31,8 @@ module.exports = {
     },
     startSingleChat: function(data, successCallback, errorCallback) {
         cordova.exec(successCallback, errorCallback, "KommunicateCordovaPlugin", "startSingleChat", [JSON.stringify(data)]);
+    },
+    conversationBuilder: function(data, successCallback, errorCallback){
+        cordova.exec(successCallback, errorCallback, "KommunicateCordovaPlugin", "conversationBuilder", [JSON.stringify(data)]);
     }
 };

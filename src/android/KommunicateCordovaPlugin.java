@@ -8,6 +8,7 @@ import com.applozic.mobicomkit.Applozic;
 import com.applozic.mobicomkit.api.account.register.RegistrationResponse;
 import com.applozic.mobicomkit.api.account.user.MobiComUserPreference;
 import com.applozic.mobicomkit.api.account.user.PushNotificationTask;
+import com.applozic.mobicomkit.channel.service.ChannelService;
 import com.applozic.mobicomkit.feed.ChannelFeedApiResponse;
 import com.applozic.mobicomkit.uiwidgets.async.AlChannelCreateAsyncTask;
 import com.applozic.mobicomkit.uiwidgets.async.AlGroupInformationAsyncTask;
@@ -20,6 +21,7 @@ import com.applozic.mobicomkit.uiwidgets.async.AlChannelInfoTask;
 import org.json.JSONObject;
 
 import io.kommunicate.KMGroupInfo;
+import io.kommunicate.KmChatBuilder;
 import io.kommunicate.KmException;
 import io.kommunicate.Kommunicate;
 import io.kommunicate.callbacks.KMLoginHandler;
@@ -159,6 +161,78 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                 });
 
             } catch (Exception e) {
+                callback.error(e.getMessage());
+            }
+        } else if (action.equals("conversationBuilder")) {
+            try {
+                final JSONObject jsonObject = new JSONObject(data.getString(0));
+
+                KmChatBuilder chatBuilder = new KmChatBuilder(cordova.getActivity());
+
+                if (jsonObject.has("appId")) {
+                    chatBuilder.setApplicationId(jsonObject.getString("appId"));
+                }
+
+                if (jsonObject.has("withPreChat")) {
+                    chatBuilder.setWithPreChat(jsonObject.getBoolean("withPreChat"));
+                }
+
+                if (jsonObject.has("kmUser")) {
+                    chatBuilder.setKmUser((KMUser) GsonUtils.getObjectFromJson(jsonObject.getString("kmUser"), KMUser.class));
+                }
+
+                if (jsonObject.has("isUnique")) {
+                    chatBuilder.setSingleChat(jsonObject.getBoolean("isUnique"));
+                }
+
+                if (jsonObject.has("agentIds")) {
+                    chatBuilder.setAgentIds((List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("agentIds"), List.class));
+                }
+
+                if (jsonObject.has("botIds")) {
+                    chatBuilder.setBotIds((List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("botIds"), List.class));
+                }
+
+                if (jsonObject.has("groupName")) {
+                    chatBuilder.setChatName(jsonObject.getString("groupName"));
+                }
+
+                if (jsonObject.has("deviceToken")) {
+                    chatBuilder.setDeviceToken(jsonObject.getString("deviceToken"));
+                }
+
+                if (jsonObject.has("metadata")) {
+                    chatBuilder.setMetadata((Map<String, String>) GsonUtils.getObjectFromJson(jsonObject.getString("metadata"), Map.class));
+                }
+
+                if (jsonObject.has("createOnly") && jsonObject.getBoolean("createOnly")) {
+                    chatBuilder.createChat(new KmCallback() {
+                        @Override
+                        public void onSuccess(Object message) {
+                            Channel channel = ChannelService.getInstance(context).getChannelByChannelKey((Integer) message);
+                            callback.success(channel != null && !TextUtils.isEmpty(channel.getClientGroupId()) ? channel.getClientGroupId() : (String) message);
+                        }
+
+                        @Override
+                        public void onFailure(Object error) {
+                            callback.error(error != null ? error.toString() : "Unknown error occurred");
+                        }
+                    });
+                } else {
+                    chatBuilder.launchChat(new KmCallback() {
+                        @Override
+                        public void onSuccess(Object message) {
+                            callback.success(message != null ? message.toString() : "Success");
+                        }
+
+                        @Override
+                        public void onFailure(Object error) {
+                            callback.error(error != null ? error.toString() : "Unknown error occurred");
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
                 callback.error(e.getMessage());
             }
         } else if (action.equals("launchConversation")) {
