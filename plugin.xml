@@ -60,7 +60,7 @@
 
   <platform name="ios">
         <pods-config ios-min-version="9.0" use-frameworks="true"/>
-        <pod name="Kommunicate" version="1.4.0"/>
+        <pod name="Kommunicate" version="1.4.1"/>
         
         <config-file target="config.xml" parent="/*">
           <feature name="KommunicateCordovaPlugin">

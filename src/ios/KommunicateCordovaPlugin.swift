@@ -257,6 +257,10 @@ import Applozic
             status: CDVCommandStatus_ERROR
         )
         self.command = command;
+        self.isUnique = true
+        self.createOnly = false;
+        self.agentIds = [];
+        self.botIds = [];
         
         let jsonStr = command.arguments[0] as? String ?? ""
         let data = jsonStr.data(using: .utf8)!
@@ -264,7 +268,6 @@ import Applozic
             if let jsonObj = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? Dictionary<String,Any>{
                 
                 var withPrechat : Bool = false
-                var isUnique : Bool = true
                 var kmUser : KMUser? = nil
                 
                 if jsonObj["appId"] != nil {
@@ -276,7 +279,7 @@ import Applozic
                 }
                 
                 if jsonObj["isUnique"] != nil{
-                    isUnique = jsonObj["isUnique"] as! Bool
+                    self.isUnique = jsonObj["isUnique"] as! Bool
                 }
                 
                 let json = try? JSONSerialization.jsonObject(with: data,options: [])
@@ -299,7 +302,7 @@ import Applozic
                     self.botIds = botIds
                     
                     if Kommunicate.isLoggedIn{
-                        self.handleCreateConversation(isUnique: isUnique, createOnly: false, agentIds: agentIds, botIds: botIds ?? [])
+                        self.handleCreateConversation()
                     }else{
                         if jsonObj["appId"] != nil {
                             Kommunicate.setup(applicationId: jsonObj["appId"] as! String)
@@ -331,7 +334,7 @@ import Applozic
                                     )
                                     return
                                 }
-                                self.handleCreateConversation(isUnique: isUnique, createOnly: false, agentIds: agentIds, botIds: botIds ?? [])
+                                self.handleCreateConversation()
                             })
                         }else{
                             let controller = KMPreChatFormViewController(configuration: Kommunicate.defaultConfiguration)
@@ -358,6 +361,10 @@ import Applozic
             status: CDVCommandStatus_ERROR
         )
         self.command = command;
+        self.isUnique = true
+        self.createOnly = false;
+        self.agentIds = [];
+        self.botIds = [];
         
         let jsonStr = command.arguments[0] as? String ?? ""
         let data = jsonStr.data(using: .utf8)!
@@ -365,7 +372,7 @@ import Applozic
             if let jsonObj = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? Dictionary<String,Any>{
                 
                 var withPrechat : Bool = false
-                var isUnique : Bool = true
+                
                 var kmUser : KMUser? = nil
                 
                 if jsonObj["appId"] != nil {
@@ -377,7 +384,7 @@ import Applozic
                 }
                 
                 if jsonObj["isUnique"] != nil{
-                    isUnique = jsonObj["isUnique"] as! Bool
+                    self.isUnique = jsonObj["isUnique"] as! Bool
                 }
                 
                 if(jsonObj["createOnly"] != nil){
@@ -400,7 +407,7 @@ import Applozic
                     self.botIds = botIds
                     
                     if Kommunicate.isLoggedIn{
-                        self.handleCreateConversation(isUnique: isUnique, createOnly: false, agentIds: agentIds, botIds: botIds ?? [])
+                        self.handleCreateConversation()
                     }else{
                         if jsonObj["appId"] != nil {
                             Kommunicate.setup(applicationId: jsonObj["appId"] as! String)
@@ -432,7 +439,7 @@ import Applozic
                                     )
                                     return
                                 }
-                                self.handleCreateConversation(isUnique: isUnique, createOnly: false, agentIds: agentIds, botIds: botIds ?? [])
+                                self.handleCreateConversation()
                             })
                         }else{
                             let controller = KMPreChatFormViewController(configuration: Kommunicate.defaultConfiguration)
@@ -453,14 +460,14 @@ import Applozic
         }
     }
     
-    func handleCreateConversation(isUnique: Bool, createOnly: Bool, agentIds: [String]?, botIds: [String]?){
+    func handleCreateConversation(){
         var pluginResult = CDVPluginResult(
             status: CDVCommandStatus_ERROR
         )
         Kommunicate.createConversation(userId: "",
-                                       agentIds: agentIds ?? [],
-                                       botIds: botIds,
-                                       useLastConversation: isUnique,
+                                       agentIds: self.agentIds ?? [],
+                                       botIds: self.botIds,
+                                       useLastConversation: self.isUnique,
                                        completion: {response in guard !response.isEmpty else{
                                         pluginResult = CDVPluginResult(
                                             status: CDVCommandStatus_ERROR,
@@ -473,7 +480,7 @@ import Applozic
                                         return
                                         }
                                         
-                                        if createOnly{
+                                        if self.createOnly{
                                             pluginResult = CDVPluginResult(
                                                 status: CDVCommandStatus_OK,
                                                 messageAs: response
@@ -499,27 +506,27 @@ import Applozic
     }
     
     func launchChatWithClientGroupId(clientGroupId :String?)  {
-        
         let alChannelService = ALChannelService()
         alChannelService.getChannelInformation(nil, orClientChannelKey: clientGroupId) { (channel) in
             guard let channel = channel, let key = channel.key else {
                 return
             }
-            
-            let convViewModel = ALKConversationViewModel(contactId: nil, channelKey: key, localizedStringFileName: Kommunicate.defaultConfiguration.localizedStringFileName)
-            let conversationViewController = ALKConversationViewController(configuration: Kommunicate.defaultConfiguration)
-            
-            conversationViewController.title = channel.name
-            conversationViewController.viewModel = convViewModel
-            
-            let back = NSLocalizedString("Back", value: "Back", comment: "")
-            let leftBarButtonItem = UIBarButtonItem(title: back, style: .plain, target: self, action: #selector(self.customBackAction))
-            
-            conversationViewController.navigationItem.leftBarButtonItem = leftBarButtonItem
-            
-            let navVC = ALKBaseNavigationViewController(rootViewController: conversationViewController)
-            
-            UIApplication.topViewController()?.present(navVC, animated: false, completion: nil)
+            DispatchQueue.main.async{
+                let convViewModel = ALKConversationViewModel(contactId: nil, channelKey: key, localizedStringFileName: Kommunicate.defaultConfiguration.localizedStringFileName)
+                let conversationViewController = ALKConversationViewController(configuration: Kommunicate.defaultConfiguration)
+                
+                conversationViewController.title = channel.name
+                conversationViewController.viewModel = convViewModel
+                
+                let back = NSLocalizedString("Back", value: "Back", comment: "")
+                let leftBarButtonItem = UIBarButtonItem(title: back, style: .plain, target: self, action: #selector(self.customBackAction))
+                
+                conversationViewController.navigationItem.leftBarButtonItem = leftBarButtonItem
+                
+                let navVC = ALKBaseNavigationViewController(rootViewController: conversationViewController)
+                
+                UIApplication.topViewController()?.present(navVC, animated: false, completion: nil)
+            }
         }
     }
     
@@ -563,7 +570,7 @@ import Applozic
                 return
             }
             
-            self.handleCreateConversation(isUnique: self.isUnique, createOnly: self.createOnly, agentIds: self.agentIds, botIds: self.botIds!)
+            self.handleCreateConversation()
         })
     }
     
