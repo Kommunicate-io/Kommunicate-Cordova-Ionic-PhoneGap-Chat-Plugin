@@ -29,7 +29,6 @@
     </config-file>
 
     <source-file src="src/android/KommunicateCordovaPlugin.java" target-dir="src/io/kommunicate/phonegap/"/>
-    <source-file src="src/android/FcmInstanceIDListenerService.java" target-dir="src/io/kommunicate/phonegap/notification"/>
     <source-file src="src/android/FcmListenerService.java" target-dir="src/io/kommunicate/phonegap/notification"/>
     <source-file src="src/android/applozic-settings.json" target-dir="assets"/>
 
