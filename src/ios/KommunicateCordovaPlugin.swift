@@ -492,48 +492,29 @@ import Applozic
                                                 messageAs: "Success"
                                             )
                                         }
-                                        
+
                                         self.commandDelegate!.send(
                                             pluginResult,
                                             callbackId: self.command!.callbackId
                                         )
         })
     }
-    
+
     @objc (registerPushNotification:)
     func registerPushNotification(command: CDVInvokedUrlCommand){
-        
+
     }
-    
+
     func launchChatWithClientGroupId(clientGroupId :String?)  {
-        let alChannelService = ALChannelService()
-        alChannelService.getChannelInformation(nil, orClientChannelKey: clientGroupId) { (channel) in
-            guard let channel = channel, let key = channel.key else {
-                return
-            }
-            DispatchQueue.main.async{
-                let convViewModel = ALKConversationViewModel(contactId: nil, channelKey: key, localizedStringFileName: Kommunicate.defaultConfiguration.localizedStringFileName)
-                let conversationViewController = ALKConversationViewController(configuration: Kommunicate.defaultConfiguration)
-                
-                conversationViewController.title = channel.name
-                conversationViewController.viewModel = convViewModel
-                
-                let back = NSLocalizedString("Back", value: "Back", comment: "")
-                let leftBarButtonItem = UIBarButtonItem(title: back, style: .plain, target: self, action: #selector(self.customBackAction))
-                
-                conversationViewController.navigationItem.leftBarButtonItem = leftBarButtonItem
-                
-                let navVC = ALKBaseNavigationViewController(rootViewController: conversationViewController)
-                
-                UIApplication.topViewController()?.present(navVC, animated: false, completion: nil)
-            }
+        Kommunicate.showConversationWith(groupId: clientGroupId!, from: UIApplication.topViewController()!) { (result) in
+            print(result)
         }
     }
-    
+
     func closeButtonTapped() {
         viewController.dismiss(animated: false, completion: nil)
     }
-    
+
     func userSubmittedResponse(name: String, email: String, phoneNumber: String) {
         viewController.dismiss(animated: false, completion: nil)
         var pluginResult = CDVPluginResult(
