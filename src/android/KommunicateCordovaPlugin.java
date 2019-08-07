@@ -13,6 +13,7 @@ import com.applozic.mobicomkit.feed.ChannelFeedApiResponse;
 import com.applozic.mobicomkit.uiwidgets.async.AlChannelCreateAsyncTask;
 import com.applozic.mobicomkit.uiwidgets.async.AlGroupInformationAsyncTask;
 import com.applozic.mobicomkit.uiwidgets.conversation.ConversationUIService;
+import com.applozic.mobicomkit.uiwidgets.conversation.activity.ConversationActivity;
 import com.applozic.mobicommons.json.GsonUtils;
 import com.applozic.mobicommons.people.channel.Channel;
 import com.applozic.mobicomkit.api.notification.MobiComPushReceiver;
@@ -22,6 +23,7 @@ import org.json.JSONObject;
 
 import io.kommunicate.KMGroupInfo;
 import io.kommunicate.KmChatBuilder;
+import io.kommunicate.KmConversationBuilder;
 import io.kommunicate.KmException;
 import io.kommunicate.Kommunicate;
 import io.kommunicate.callbacks.KMLoginHandler;
@@ -29,7 +31,6 @@ import io.kommunicate.callbacks.KMStartChatHandler;
 import io.kommunicate.callbacks.KmCallback;
 import io.kommunicate.users.KMUser;
 import io.kommunicate.callbacks.KMLogoutHandler;
-import io.kommunicate.activities.KMConversationActivity;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -148,7 +149,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                     groupName = jsonObject.getString("groupName");
                 }
 
-                Kommunicate.launchSingleChat(cordova.getActivity(), groupName == null ? "Support" : groupName, user, withPrechat, isUnique, agentIds, botIds, new KmCallback() {
+                Kommunicate.launchSingleChat(cordova.getActivity(), groupName == null ? "Support" : groupName, user, withPrechat, isUnique, agentIds, botIds, null, new KmCallback() {
                     @Override
                     public void onSuccess(Object message) {
                         callback.success(message != null ? message.toString() : "Success");
@@ -159,6 +160,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                         callback.error(error != null ? error.toString() : "Unknown error occurred");
                     }
                 });
+
 
             } catch (Exception e) {
                 callback.error(e.getMessage());
@@ -237,7 +239,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
             }
         } else if (action.equals("launchConversation")) {
             try {
-                Intent intent = new Intent(context, KMConversationActivity.class);
+                Intent intent = new Intent(context, ConversationActivity.class);
                 cordova.getActivity().startActivity(intent);
                 callback.success(response);
             } catch (Exception e) {
@@ -249,7 +251,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                 AlChannelInfoTask.ChannelInfoListener listener = new AlChannelInfoTask.ChannelInfoListener() {
                     @Override
                     public void onSuccess(AlChannelInfoTask.ChannelInfoModel channelInfoModel, String response, Context context) {
-                        Intent intent = new Intent(context, KMConversationActivity.class);
+                        Intent intent = new Intent(context, ConversationActivity.class);
                         intent.putExtra(ConversationUIService.GROUP_ID, channelInfoModel.getChannel().getKey());
                         try {
                             intent.putExtra(ConversationUIService.TAKE_ORDER, jsonObject.getBoolean("takeOrder")); //Skip chat list for showing on back press
@@ -298,7 +300,12 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                 final List<String> agentIds = jsonObject.has("agentIds") ? (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("agentIds"), List.class) : null;
                 final List<String> botIds = jsonObject.has("botIds") ? (List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("botIds"), List.class) : null;
 
-                Kommunicate.startConversation(context, groupName, agentIds, botIds, isUnique, new KMStartChatHandler() {
+                KmChatBuilder builder = new KmChatBuilder(cordova.getActivity())
+                        .setAgentIds(agentIds)
+                        .setBotIds(botIds)
+                        .setChatName(groupName)
+                        .setSingleChat(isUnique);
+                Kommunicate.startConversation(builder,  new KMStartChatHandler() {
                     @Override
                     public void onSuccess(Channel channel, Context context) {
                         callback.success(channel.getClientGroupId());

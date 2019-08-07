@@ -51,9 +51,9 @@
   </platform>
 
   <platform name="ios">
-        <pods-config ios-min-version="9.0" use-frameworks="true"/>
-        <pod name="Kommunicate" version="1.4.1"/>
-        
+        <pods-config ios-min-version="10.0" use-frameworks="true"/>
+        <pod name="Kommunicate" version="2.2.0"/>
+
         <config-file target="config.xml" parent="/*">
           <feature name="KommunicateCordovaPlugin">
             <param name="ios-package" value="KommunicateCordovaPlugin" />
