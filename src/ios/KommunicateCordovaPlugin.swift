@@ -2,25 +2,28 @@ import Kommunicate
 import ApplozicSwift
 import Applozic
 @objc(KommunicateCordovaPlugin) class KommunicateCordovaPlugin : CDVPlugin, KMPreChatFormViewControllerDelegate {
-    
+
     var appId : String? = nil;
     var command: CDVInvokedUrlCommand? = nil;
     var agentIds: [String]? = [];
     var botIds: [String]? = [];
     var createOnly: Bool = false;
     var isUnique: Bool = true;
-    
+
     @objc (login:)
     func login(command: CDVInvokedUrlCommand) {
         var pluginResult = CDVPluginResult(
             status: CDVCommandStatus_ERROR
         )
-        
+
         var jsonStr = command.arguments[0] as? String ?? ""
         jsonStr = jsonStr.replacingOccurrences(of: "\\\"", with: "\"")
         jsonStr = "\(jsonStr)"
         let kmUser = KMUser(jsonString: jsonStr)
-        
+        if let appId = kmUser?.applicationId {
+            Kommunicate.setup(applicationId: appId)
+        }
+
         Kommunicate.registerUser(kmUser!, completion:{
             response, error in
             guard error == nil else{
