@@ -157,7 +157,7 @@ import Applozic
             }
             let botIds = dictionary["botIds"] as? [String]
             //let botIds = (botId != nil) ? [botId!]:nil
-            Kommunicate.createConversation(userId: "",
+            Kommunicate.createConversation(userId: KMUserDefaultHandler.getUserId() ?? "",
                                            agentIds: agentId,
                                            botIds: botIds,
                                            completion: {response in guard !response.isEmpty else{
@@ -209,7 +209,7 @@ import Applozic
             }
             let botIds = dictionary["botIds"] as? [String]
             //let botIds = (botId != nil) ? [botId!]:nil
-            Kommunicate.createConversation(userId: "",
+            Kommunicate.createConversation(userId: KMUserDefaultHandler.getUserId() ?? "",
                                            agentIds: agentId,
                                            botIds: botIds,
                                            useLastConversation: true,
@@ -467,7 +467,7 @@ import Applozic
         var pluginResult = CDVPluginResult(
             status: CDVCommandStatus_ERROR
         )
-        Kommunicate.createConversation(userId: "",
+        Kommunicate.createConversation(userId: KMUserDefaultHandler.getUserId() ?? "",
                                        agentIds: self.agentIds ?? [],
                                        botIds: self.botIds,
                                        useLastConversation: self.isUnique,
