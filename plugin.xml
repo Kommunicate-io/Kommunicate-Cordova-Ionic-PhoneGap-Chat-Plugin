@@ -6,7 +6,6 @@
 
   <name>Kommunicate</name>
 
-  <dependency id="cordova-plugin-add-swift-support" version="1.7.2"/>
   <dependency id="cordova-plugin-cocoapod-support"/>
   
   <engines>
@@ -50,9 +49,14 @@
 
   </platform>
 
+<hook type="after_prepare" src="src/add-swift-support.js" />
+
   <platform name="ios">
         <pods-config ios-min-version="9.0" use-frameworks="true"/>
         <pod name="Kommunicate" version="1.4.1"/>
+
+        <hook type="after_platform_add" src="src/km-add-swift-support.js" />
+        <hook type="after_plugin_add" src="src/km-add-swift-support.js" />
         
         <config-file target="config.xml" parent="/*">
           <feature name="KommunicateCordovaPlugin">
@@ -103,6 +107,23 @@
   
     <source-file src="src/ios/KommunicateCordovaPlugin.swift"/>
     <header-file src="src/ios/Kommunicate-Bridging-Header.h" />
+  </platform>
+
+  <platform name="osx">
+    <hook type="after_platform_add" src="src/km-add-swift-support.js" />
+    <hook type="after_plugin_add" src="src/km-add-swift-support.js" />
+  </platform>
+
+  <platform name="browser">
+    <config-file target="config.xml" parent="/*">
+        <feature name="KommunicateCordovaPlugin">
+            <param name="browser-package" value="KommunicateCordovaPlugin" />
+        </feature>
+    </config-file>
+
+    <js-module src="src/browser/KommunicateCordovaPluginProxy.js" name="KommunicateCordovaPluginProxy">
+        <runs />
+    </js-module>
   </platform>
 
   <platform name="wp7">
