@@ -213,6 +213,7 @@ function createConversation(conversationObj, userId, successCallback, errorCallb
 						Kommunicate.openConversation(response.response.id, (response) => {
 							successCallback(clientChannelKey);
 						});
+						parent.document.getElementById('kommunicate-widget-iframe').setAttribute("style", "display:block");
 					}
 				},
 				error: (error) => {
