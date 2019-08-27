@@ -27,6 +27,7 @@ var KommunicateCordovaPlugin = {
 	launchParticularConversation: function (successCallback, errorCallback, conversationObj) {
 		console.log("Called launchParticularConversation function : " + JSON.parse(conversationObj).clientChannelKey);
 		init((response) => {
+      KommunicateGlobal.document.getElementById("mck-sidebox-launcher").click();
 			KommunicateGlobal.$applozic.fn.applozic('loadGroupTabByClientGroupId', {
 				"clientGroupId": JSON.parse(conversationObj).clientChannelKey
 			});
@@ -54,7 +55,7 @@ var KommunicateCordovaPlugin = {
 				kmUser.applicationId = conversationObj.appId
 			} else if (conversationObj.withPreChat && conversationObj.withPreChat == true) {
 				kmUser.withPreChat = true;
-				kmUser.applicationId = conversationObj.appId
+        kmUser.applicationId = conversationObj.appId
 			} else {
 				kmUser = {
 					'userId': getRandomId(),
@@ -62,7 +63,9 @@ var KommunicateCordovaPlugin = {
 				}
 			}
 			initPlugin(kmUser, (response) => {
-				createConversation(conversationObj, kmUser.userId, successCallback, errorCallback);
+        if(!(kmUser.withPreChat && kmUser.withPreChat == true)) {
+         createConversation(conversationObj, kmUser.userId, successCallback, errorCallback);
+        }
 			}, (error) => {
 				errorCallback(error);
 			});
@@ -137,10 +140,16 @@ function initPlugin(kmUser, successCallback, errorCallback) {
 				if (response && response === "success") {
 					if (kmUser.withPreChat == true) {
 						kmUser.userId = JSON.parse(sessionStorage.getItem("mckAppHeaders")).userId;
-					}
+          }
+          
+          KommunicateGlobal.document.getElementById('km-chat-widget-close-button').addEventListener('click',function(){
+            var testClick = parent.document.getElementById("kommunicate-widget-iframe");
+            testClick.style.display = "none";
+          });
+
 					console.log("Login response : " + JSON.stringify(response));
 					localStorage.setItem('KM_PLUGIN_USER_DETAILS', JSON.stringify(kmUser))
-					parent.document.getElementById('kommunicate-widget-iframe').setAttribute("style", "display:none");
+					!(kmUser.withPreChat && kmUser.withPreChat == true) && parent.document.getElementById('kommunicate-widget-iframe').setAttribute("style", "display:none");
 					successCallback(response);
 				} else {
 					errorCallback(response);
@@ -206,18 +215,21 @@ function createConversation(conversationObj, userId, successCallback, errorCallb
 					clientGroupId: clientChannelKey
 				},
 				success: (response) => {
-					console.log("Found group : " + response);
-					if (conversationObj.createOnly && conversationObj.createOnly == true) {
-						successCallback(clientChannelKey)
-					} else {
-						Kommunicate.openConversation(response.response.id, (response) => {
-							successCallback(clientChannelKey);
-						});
-					}
+          if (response) {
+             if (response.status === "error") {
+                if (response.errorResponse[0].errorCode === "AL-G-01") {
+                  startConversation(conversationObj, clientChannelKey, successCallback, errorCallback);
+                } else {
+                  errorCallback(JSON.stringify(response));
+                }
+             } else if (response.status === "success") {
+                  processOpenConversation(conversationObj, clientChannelKey, successCallback);
+             }
+          }
 				},
 				error: (error) => {
 					console.log("Error when getting group : " + error);
-					startConversation(conversationObj, clientChannelKey, successCallback, errorCallback);
+					errorCallback(error);
 				}
 			});
 		} else {
@@ -226,6 +238,19 @@ function createConversation(conversationObj, userId, successCallback, errorCallb
 	}, (error) => {
 		errorCallback(error)
 	});
+}
+
+function processOpenConversation(conversationObj, clientChannelKey, successCallback) {
+ if (conversationObj.createOnly && conversationObj.createOnly == true) {
+      successCallback(clientChannelKey)
+  } else {
+    KommunicateGlobal.document.getElementById("mck-sidebox-launcher").click();
+    KommunicateGlobal.$applozic.fn.applozic('loadGroupTabByClientGroupId', {
+      "clientGroupId": clientChannelKey
+    });
+    parent.document.getElementById('kommunicate-widget-iframe').setAttribute("style", "display:block");
+    successCallback(clientChannelKey);
+  }
 }
 
 function startConversation(conversationObj, clientChannelKey, successCallback, errorCallback) {
@@ -238,10 +263,11 @@ function startConversation(conversationObj, clientChannelKey, successCallback, e
 		'clientGroupId': clientChannelKey
 	};
 	Kommunicate.startConversation(conversationDetail, function (response) {
-		console.log("Create group response : " + response);
-		successCallback(response)
+    console.log("Create conversation response : " + response);
+    parent.document.getElementById('kommunicate-widget-iframe').setAttribute("style", "display:block");
+    successCallback(response);
 	}, (error) => {
-    console.log("Create group error : " + error);
+    console.log("Create conversation error : " + error);
     errorCallback(error);
 	});
 }
@@ -268,6 +294,8 @@ function generateClientConversationId(conversationObj, userId) {
 	}
 	return clientId;
 }
+
+var checkForKmWidget;
 
 module.exports = KommunicateCordovaPlugin;
 
