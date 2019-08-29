@@ -2,25 +2,28 @@ import Kommunicate
 import ApplozicSwift
 import Applozic
 @objc(KommunicateCordovaPlugin) class KommunicateCordovaPlugin : CDVPlugin, KMPreChatFormViewControllerDelegate {
-    
+
     var appId : String? = nil;
     var command: CDVInvokedUrlCommand? = nil;
     var agentIds: [String]? = [];
     var botIds: [String]? = [];
     var createOnly: Bool = false;
     var isUnique: Bool = true;
-    
+
     @objc (login:)
     func login(command: CDVInvokedUrlCommand) {
         var pluginResult = CDVPluginResult(
             status: CDVCommandStatus_ERROR
         )
-        
+
         var jsonStr = command.arguments[0] as? String ?? ""
         jsonStr = jsonStr.replacingOccurrences(of: "\\\"", with: "\"")
         jsonStr = "\(jsonStr)"
         let kmUser = KMUser(jsonString: jsonStr)
-        
+        if let appId = kmUser?.applicationId {
+            Kommunicate.setup(applicationId: appId)
+        }
+
         Kommunicate.registerUser(kmUser!, completion:{
             response, error in
             guard error == nil else{
@@ -154,7 +157,7 @@ import Applozic
             }
             let botIds = dictionary["botIds"] as? [String]
             //let botIds = (botId != nil) ? [botId!]:nil
-            Kommunicate.createConversation(userId: "",
+            Kommunicate.createConversation(userId: KMUserDefaultHandler.getUserId() ?? "",
                                            agentIds: agentId,
                                            botIds: botIds,
                                            completion: {response in guard !response.isEmpty else{
@@ -206,7 +209,7 @@ import Applozic
             }
             let botIds = dictionary["botIds"] as? [String]
             //let botIds = (botId != nil) ? [botId!]:nil
-            Kommunicate.createConversation(userId: "",
+            Kommunicate.createConversation(userId: KMUserDefaultHandler.getUserId() ?? "",
                                            agentIds: agentId,
                                            botIds: botIds,
                                            useLastConversation: true,
@@ -464,7 +467,7 @@ import Applozic
         var pluginResult = CDVPluginResult(
             status: CDVCommandStatus_ERROR
         )
-        Kommunicate.createConversation(userId: "",
+        Kommunicate.createConversation(userId: KMUserDefaultHandler.getUserId() ?? "",
                                        agentIds: self.agentIds ?? [],
                                        botIds: self.botIds,
                                        useLastConversation: self.isUnique,
@@ -492,48 +495,29 @@ import Applozic
                                                 messageAs: "Success"
                                             )
                                         }
-                                        
+
                                         self.commandDelegate!.send(
                                             pluginResult,
                                             callbackId: self.command!.callbackId
                                         )
         })
     }
-    
+
     @objc (registerPushNotification:)
     func registerPushNotification(command: CDVInvokedUrlCommand){
-        
+
     }
-    
+
     func launchChatWithClientGroupId(clientGroupId :String?)  {
-        let alChannelService = ALChannelService()
-        alChannelService.getChannelInformation(nil, orClientChannelKey: clientGroupId) { (channel) in
-            guard let channel = channel, let key = channel.key else {
-                return
-            }
-            DispatchQueue.main.async{
-                let convViewModel = ALKConversationViewModel(contactId: nil, channelKey: key, localizedStringFileName: Kommunicate.defaultConfiguration.localizedStringFileName)
-                let conversationViewController = ALKConversationViewController(configuration: Kommunicate.defaultConfiguration)
-                
-                conversationViewController.title = channel.name
-                conversationViewController.viewModel = convViewModel
-                
-                let back = NSLocalizedString("Back", value: "Back", comment: "")
-                let leftBarButtonItem = UIBarButtonItem(title: back, style: .plain, target: self, action: #selector(self.customBackAction))
-                
-                conversationViewController.navigationItem.leftBarButtonItem = leftBarButtonItem
-                
-                let navVC = ALKBaseNavigationViewController(rootViewController: conversationViewController)
-                
-                UIApplication.topViewController()?.present(navVC, animated: false, completion: nil)
-            }
+        Kommunicate.showConversationWith(groupId: clientGroupId!, from: UIApplication.topViewController()!) { (result) in
+            print(result)
         }
     }
-    
+
     func closeButtonTapped() {
         viewController.dismiss(animated: false, completion: nil)
     }
-    
+
     func userSubmittedResponse(name: String, email: String, phoneNumber: String) {
         viewController.dismiss(animated: false, completion: nil)
         var pluginResult = CDVPluginResult(

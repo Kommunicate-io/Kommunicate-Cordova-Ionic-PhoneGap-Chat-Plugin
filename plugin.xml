@@ -2,12 +2,12 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         id="kommunicate-cordova-plugin"
         xmlns:tools="http://schemas.android.com/tools"
-        version="0.4.10">
+        version="0.4.13">
 
   <name>Kommunicate</name>
 
   <dependency id="cordova-plugin-cocoapod-support"/>
-  
+
   <engines>
     <engine name="cordova" version=">=3.4.0"/>
   </engines>
@@ -52,8 +52,8 @@
 <hook type="after_prepare" src="src/add-swift-support.js" />
 
   <platform name="ios">
-        <pods-config ios-min-version="9.0" use-frameworks="true"/>
-        <pod name="Kommunicate" version="1.4.1"/>
+        <pods-config ios-min-version="10.0" use-frameworks="true"/>
+        <pod name="Kommunicate" version="2.2.0"/>
 
         <hook type="after_platform_add" src="src/km-add-swift-support.js" />
         <hook type="after_plugin_add" src="src/km-add-swift-support.js" />
