@@ -1,6 +1,6 @@
 {
   "name": "kommunicate-cordova-plugin",
-  "version": "0.4.12",
+  "version": "0.4.13",
   "description": "Kommunicate is a customer communication software for growing businesses for building long-lasting customer relationships that drive growth.",
   "cordova": {
     "id": "kommunicate-cordova-plugin",
