@@ -1,6 +1,5 @@
 var KommunicateCordovaPlugin = {
 	login: function (successCallback, errorCallback, kmUser) {
-		console.log("Received object : " + kmUser);
 		if (isUserLoggedIn() && typeof Kommunicate != 'undefined' && Kommunicate) {
 			successCallback("success")
 		} else {
@@ -9,12 +8,10 @@ var KommunicateCordovaPlugin = {
 	},
 
 	isLoggedIn: function (successCallback, errorCallback) {
-		console.log("Called isLoggedIn function ");
 		successCallback(isUserLoggedIn() ? "true" : "false")
 	},
 
 	launchConversation: function (successCallback, errorCallback) {
-		console.log("Called launchConversation function ");
 		init((response) => {
 			Kommunicate.launchConversation();
 			parent.document.getElementById('kommunicate-widget-iframe').setAttribute("style", "display:block");
@@ -25,7 +22,6 @@ var KommunicateCordovaPlugin = {
 	},
 
 	launchParticularConversation: function (successCallback, errorCallback, conversationObj) {
-		console.log("Called launchParticularConversation function : " + JSON.parse(conversationObj).clientChannelKey);
 		init((response) => {
       KommunicateGlobal.document.getElementById("mck-sidebox-launcher").click();
 			KommunicateGlobal.$applozic.fn.applozic('loadGroupTabByClientGroupId', {
@@ -39,7 +35,6 @@ var KommunicateCordovaPlugin = {
 	},
 
 	conversationBuilder: function (successCallback, errorCallback, conversationObjectStr) {
-		console.log("Called conversationBuilder function : " + conversationObjectStr);
 		var conversationObj = JSON.parse(conversationObjectStr);
 		var kmUser = {};
 
@@ -73,36 +68,31 @@ var KommunicateCordovaPlugin = {
 	},
 
 	logout: function (successCallback, errorCallback) {
-		console.log("Called logout function ");
 		if (isUserLoggedIn() && typeof Kommunicate != 'undefined' && Kommunicate) {
 			init((response) => {
-				//Kommunicate.launchConversation();
 				Kommunicate.logout();
-				localStorage.removeItem('KM_PLUGIN_USER_DETAILS');
-				location.reload()
-				successCallback(response)
+        localStorage.removeItem('KM_PLUGIN_USER_DETAILS');
+        //location.reload();
+				successCallback("success")
 			}, (error) => {
 				errorCallback(error)
 			});
 		} else {
-			localStorage.removeItem('KM_PLUGIN_USER_DETAILS');
+      localStorage.removeItem('KM_PLUGIN_USER_DETAILS');
+      //location.reload();
 			successCallback("success")
-			location.reload()
 		}
 	},
 
 	processPushNotification: function (successCallback, errorCallback, data) {
-		console.log("Called processPushNotification function : " + data);
 		errorCallback("function not implemented");
 	},
 
 	updatePushNotificationToken: function (successCallback, errorCallback, token) {
-		console.log("Called updatePushNotificationToken function : " + token);
 		errorCallback("function not implemented");
 	},
 
 	registerPushNotification: function (successCallback, errorCallback) {
-		console.log("Called registerPushNotification function ");
 		errorCallback("function not implemented");
 	}
 }
@@ -147,7 +137,6 @@ function initPlugin(kmUser, successCallback, errorCallback) {
             testClick.style.display = "none";
           });
 
-					console.log("Login response : " + JSON.stringify(response));
 					localStorage.setItem('KM_PLUGIN_USER_DETAILS', JSON.stringify(kmUser))
 					!(kmUser.withPreChat && kmUser.withPreChat == true) && parent.document.getElementById('kommunicate-widget-iframe').setAttribute("style", "display:none");
 					successCallback(response);
@@ -228,7 +217,6 @@ function createConversation(conversationObj, userId, successCallback, errorCallb
           }
 				},
 				error: (error) => {
-					console.log("Error when getting group : " + error);
 					errorCallback(error);
 				}
 			});
@@ -263,11 +251,9 @@ function startConversation(conversationObj, clientChannelKey, successCallback, e
 		'clientGroupId': clientChannelKey
 	};
 	Kommunicate.startConversation(conversationDetail, function (response) {
-    console.log("Create conversation response : " + response);
     parent.document.getElementById('kommunicate-widget-iframe').setAttribute("style", "display:block");
     successCallback(response);
 	}, (error) => {
-    console.log("Create conversation error : " + error);
     errorCallback(error);
 	});
 }
@@ -294,8 +280,6 @@ function generateClientConversationId(conversationObj, userId) {
 	}
 	return clientId;
 }
-
-var checkForKmWidget;
 
 module.exports = KommunicateCordovaPlugin;
 
