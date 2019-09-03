@@ -48,7 +48,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
 
     @Override
     public boolean execute(String action, JSONArray data, CallbackContext callbackContext) throws JSONException {
-        Context context = cordova.getActivity().getApplicationContext();
+        final Context context = cordova.getActivity().getApplicationContext();
         final String response = "success";
 
         final CallbackContext callback = callbackContext;
