@@ -72,14 +72,12 @@ var KommunicateCordovaPlugin = {
 			init((response) => {
 				Kommunicate.logout();
         localStorage.removeItem('KM_PLUGIN_USER_DETAILS');
-        //location.reload();
 				successCallback("success")
 			}, (error) => {
 				errorCallback(error)
 			});
 		} else {
       localStorage.removeItem('KM_PLUGIN_USER_DETAILS');
-      //location.reload();
 			successCallback("success")
 		}
 	},
