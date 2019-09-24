@@ -258,7 +258,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        context.startActivity(intent);
+                        cordova.getActivity().startActivity(intent);
                         callback.success(response);
                     }
 
