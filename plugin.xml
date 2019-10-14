@@ -6,6 +6,7 @@
 
   <name>Kommunicate</name>
 
+  <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
   <dependency id="cordova-plugin-cocoapod-support"/>
 
   <engines>
@@ -49,14 +50,9 @@
 
   </platform>
 
-<hook type="after_prepare" src="src/add-swift-support.js" />
-
   <platform name="ios">
         <pods-config ios-min-version="10.0" use-frameworks="true"/>
         <pod name="Kommunicate" version="2.2.0"/>
-
-        <hook type="after_platform_add" src="src/km-add-swift-support.js" />
-        <hook type="after_plugin_add" src="src/km-add-swift-support.js" />
         
         <config-file target="config.xml" parent="/*">
           <feature name="KommunicateCordovaPlugin">
@@ -107,11 +103,6 @@
   
     <source-file src="src/ios/KommunicateCordovaPlugin.swift"/>
     <header-file src="src/ios/Kommunicate-Bridging-Header.h" />
-  </platform>
-
-  <platform name="osx">
-    <hook type="after_platform_add" src="src/km-add-swift-support.js" />
-    <hook type="after_plugin_add" src="src/km-add-swift-support.js" />
   </platform>
 
   <platform name="browser">
