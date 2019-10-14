@@ -509,8 +509,10 @@ import Applozic
     }
 
     func launchChatWithClientGroupId(clientGroupId :String?)  {
-        Kommunicate.showConversationWith(groupId: clientGroupId!, from: UIApplication.topViewController()!) { (result) in
-            print(result)
+        DispatchQueue.main.async {
+            Kommunicate.showConversationWith(groupId: clientGroupId!, from: UIApplication.topViewController()!) { (result) in
+                print(result)
+            }
         }
     }
 
@@ -530,7 +532,7 @@ import Applozic
         
         kmUser.applicationId = applicationKey
         
-        if(!email.isEmpty){
+        if(!email.isEmpty) {
             kmUser.userId = email
             kmUser.email = email
         }else if(!phoneNumber.isEmpty){

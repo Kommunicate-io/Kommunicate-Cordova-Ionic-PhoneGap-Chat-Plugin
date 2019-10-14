@@ -2,10 +2,10 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         id="kommunicate-cordova-plugin"
         xmlns:tools="http://schemas.android.com/tools"
-        version="0.4.13">
+        version="0.4.15">
 
   <name>Kommunicate</name>
-
+  
   <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
   <dependency id="cordova-plugin-cocoapod-support"/>
 
