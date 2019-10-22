@@ -5,7 +5,7 @@
         version="0.4.15">
 
   <name>Kommunicate</name>
-
+  
   <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
   <dependency id="cordova-plugin-cocoapod-support"/>
 
@@ -53,7 +53,7 @@
   <platform name="ios">
         <pods-config ios-min-version="10.0" use-frameworks="true"/>
         <pod name="Kommunicate" version="2.2.0"/>
-
+        
         <config-file target="config.xml" parent="/*">
           <feature name="KommunicateCordovaPlugin">
             <param name="ios-package" value="KommunicateCordovaPlugin" />
@@ -103,6 +103,18 @@
   
     <source-file src="src/ios/KommunicateCordovaPlugin.swift"/>
     <header-file src="src/ios/Kommunicate-Bridging-Header.h" />
+  </platform>
+
+  <platform name="browser">
+    <config-file target="config.xml" parent="/*">
+        <feature name="KommunicateCordovaPlugin">
+            <param name="browser-package" value="KommunicateCordovaPlugin" />
+        </feature>
+    </config-file>
+
+    <js-module src="src/browser/KommunicateCordovaPluginProxy.js" name="KommunicateCordovaPluginProxy">
+        <runs />
+    </js-module>
   </platform>
 
   <platform name="wp7">
