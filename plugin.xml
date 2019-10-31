@@ -8,6 +8,8 @@
   
   <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
   <dependency id="cordova-plugin-cocoapod-support"/>
+  <dependency id="cordova-plugin-androidx"/>
+  <dependency id="cordova-plugin-androidx-adapter"/>
 
   <engines>
     <engine name="cordova" version=">=3.4.0"/>
