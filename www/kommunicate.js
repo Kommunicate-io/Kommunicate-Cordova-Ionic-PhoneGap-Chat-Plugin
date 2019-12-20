@@ -34,5 +34,8 @@ module.exports = {
     },
     conversationBuilder: function(data, successCallback, errorCallback){
         cordova.exec(successCallback, errorCallback, "KommunicateCordovaPlugin", "conversationBuilder", [JSON.stringify(data)]);
+    },
+    updateChatContext: function(data, successCallback, errorCallback){
+        cordova.exec(successCallback, errorCallback, "KommunicateCordovaPlugin", "updateChatContext", [JSON.stringify(data)]);
     }
 };
