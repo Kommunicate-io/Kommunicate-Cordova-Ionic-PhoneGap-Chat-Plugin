@@ -472,12 +472,12 @@ import Applozic
     @objc(updateChatContext:)
     func updateChatContext(command: CDVInvokedUrlCommand) {
         let jsonStr = command.arguments[0] as? String ?? ""
-        let data = jsonStr.data(using: .utf8)!
         
         var pluginResult = CDVPluginResult(
             status: CDVCommandStatus_ERROR
         )
         do {
+            let data = jsonStr.data(using: .utf8)!
             guard let chatContext = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? Dictionary<String, Any> else {
                 return
             }
