@@ -341,11 +341,33 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
             } catch (Exception e) {
 
             }
+        } else if (action.equals("updateChatContext")) {
+            try {
+                HashMap<String, Object> chatContext = (HashMap<String, Object>) GsonUtils.getObjectFromJson(data.getString(0), HashMap.class);
+                if (Kommunicate.isLoggedIn(context)) {
+                    Kommunicate.updateChatContext(context, getStringMap(chatContext));
+                    callback.success("Success");
+                } else {
+                    callback.error("User not authorised. This usually happens when calling the function before conversationBuilder or loginUser. Make sure you call either of the two functions before updating the chatContext");
+                }
+            } catch (Exception e) {
+                callback.error(e.toString());
+            }
         } else {
             return false;
         }
-
         return true;
+    }
+
+    private Map<String, String> getStringMap(HashMap<String, Object> objectMap) {
+        if (objectMap == null) {
+            return null;
+        }
+        Map<String, String> newMap = new HashMap<>();
+        for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
+            newMap.put(entry.getKey(), entry.getValue() instanceof String ? (String) entry.getValue() : entry.getValue().toString());
+        }
+        return newMap;
     }
 
     private KmCallback getLaunchChatCallback(CallbackContext callback) {
