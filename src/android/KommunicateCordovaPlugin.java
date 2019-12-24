@@ -24,6 +24,7 @@ import com.applozic.mobicomkit.uiwidgets.async.AlChannelInfoTask;
 import org.json.JSONObject;
 
 import io.kommunicate.KmChatBuilder;
+import io.kommunicate.KmConversationBuilder;
 import io.kommunicate.KmConversationHelper;
 import io.kommunicate.KmException;
 import io.kommunicate.Kommunicate;
@@ -41,9 +42,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -174,42 +173,21 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
             try {
                 final JSONObject jsonObject = new JSONObject(data.getString(0));
 
-                KmChatBuilder chatBuilder = new KmChatBuilder(cordova.getActivity());
-
-                if (jsonObject.has("appId")) {
-                    chatBuilder.setApplicationId(jsonObject.getString("appId"));
-                }
-
-                if (jsonObject.has("withPreChat")) {
-                    chatBuilder.setWithPreChat(jsonObject.getBoolean("withPreChat"));
-                }
-
-                if (jsonObject.has("kmUser")) {
-                    chatBuilder.setKmUser((KMUser) GsonUtils.getObjectFromJson(jsonObject.getString("kmUser"), KMUser.class));
-                }
+                KmConversationBuilder conversationBuilder = (KmConversationBuilder) GsonUtils.getObjectFromJson(GsonUtils.getJsonFromObject(jsonObject, JSONObject.class), KmConversationBuilder.class);
+                conversationBuilder.setContext(cordova.getActivity());
 
                 if (jsonObject.has("isUnique")) {
-                    chatBuilder.setSingleChat(jsonObject.getBoolean("isUnique"));
+                    conversationBuilder.setSingleConversation(jsonObject.getBoolean("isUnique"));
+                } else {
+                    conversationBuilder.setSingleConversation(true);
                 }
 
-                if (jsonObject.has("agentIds")) {
-                    chatBuilder.setAgentIds((List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("agentIds"), List.class));
-                }
-
-                if (jsonObject.has("botIds")) {
-                    chatBuilder.setBotIds((List<String>) GsonUtils.getObjectFromJson(jsonObject.getString("botIds"), List.class));
-                }
-
-                if (jsonObject.has("groupName")) {
-                    chatBuilder.setChatName(jsonObject.getString("groupName"));
-                }
-
-                if (jsonObject.has("deviceToken")) {
-                    chatBuilder.setDeviceToken(jsonObject.getString("deviceToken"));
+                if (!jsonObject.has("skipConversationList")) {
+                    conversationBuilder.setSkipConversationList(true);
                 }
 
                 if (jsonObject.has("metadata")) {
-                    chatBuilder.setMetadata((Map<String, String>) GsonUtils.getObjectFromJson(jsonObject.getString("metadata"), Map.class));
+                    conversationBuilder.setMessageMetadata((Map<String, String>) GsonUtils.getObjectFromJson(jsonObject.getString("metadata"), Map.class));
                 }
 
                 if (jsonObject.has("launchAndCreateIfEmpty") && jsonObject.getBoolean("launchAndCreateIfEmpty")) {
@@ -218,8 +196,8 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                         public void onResult(List<Message> messageList, ApplozicException e) {
                             if (e == null) {
                                 if (messageList.isEmpty()) {
-                                    chatBuilder.setSkipChatList(false);
-                                    chatBuilder.launchChat(getLaunchChatCallback(callback));
+                                    conversationBuilder.setSkipConversationList(false);
+                                    conversationBuilder.launchConversation(getLaunchChatCallback(callback));
                                 } else if (messageList.size() == 1) {
                                     openParticularConversation(cordova.getActivity(), false, messageList.get(0).getGroupId(), getLaunchChatCallback(callback));
                                 } else {
@@ -229,7 +207,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                         }
                     });
                 } else if (jsonObject.has("createOnly") && jsonObject.getBoolean("createOnly")) {
-                    chatBuilder.createChat(new KmCallback() {
+                    conversationBuilder.createConversation(new KmCallback() {
                         @Override
                         public void onSuccess(Object message) {
                             Channel channel = ChannelService.getInstance(context).getChannelByChannelKey((Integer) message);
@@ -242,7 +220,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                         }
                     });
                 } else {
-                    chatBuilder.launchChat(getLaunchChatCallback(callback));
+                    conversationBuilder.launchConversation(getLaunchChatCallback(callback));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
