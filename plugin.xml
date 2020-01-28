@@ -7,7 +7,6 @@
   <name>Kommunicate</name>
   
   <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
-  <dependency id="cordova-plugin-cocoapod-support"/>
 
   <engines>
     <engine name="cordova" version=">=3.4.0"/>
@@ -50,10 +49,7 @@
 
   </platform>
 
-  <platform name="ios">
-        <pods-config ios-min-version="10.0" use-frameworks="true"/>
-        <pod name="Kommunicate" version="2.3.0"/>
-        
+  <platform name="ios">    
         <config-file target="config.xml" parent="/*">
           <feature name="KommunicateCordovaPlugin">
             <param name="ios-package" value="KommunicateCordovaPlugin" />
@@ -103,6 +99,16 @@
   
     <source-file src="src/ios/KommunicateCordovaPlugin.swift"/>
     <header-file src="src/ios/Kommunicate-Bridging-Header.h" />
+
+    <podspec>
+      <config>
+        <source url="https://github.com/CocoaPods/Specs.git"/>
+      </config>
+      <pods use-frameworks="true">
+        <pod name="Kommunicate" spec="~> 3.1.0" />
+      </pods>
+    </podspec>
+
   </platform>
 
   <platform name="browser">
