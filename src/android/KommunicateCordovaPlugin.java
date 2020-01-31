@@ -173,7 +173,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
             try {
                 final JSONObject jsonObject = new JSONObject(data.getString(0));
 
-                KmConversationBuilder conversationBuilder = (KmConversationBuilder) GsonUtils.getObjectFromJson(GsonUtils.getJsonFromObject(jsonObject, JSONObject.class), KmConversationBuilder.class);
+                KmConversationBuilder conversationBuilder = (KmConversationBuilder) GsonUtils.getObjectFromJson(data.getString(0), KmConversationBuilder.class);
                 conversationBuilder.setContext(cordova.getActivity());
 
                 if (jsonObject.has("isUnique")) {
