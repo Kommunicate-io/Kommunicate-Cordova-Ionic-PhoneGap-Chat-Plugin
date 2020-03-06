@@ -25,8 +25,6 @@ import org.json.JSONObject;
 
 import io.kommunicate.KmChatBuilder;
 import io.kommunicate.KmConversationBuilder;
-import io.kommunicate.KmConversationHelper;
-import io.kommunicate.KmException;
 import io.kommunicate.Kommunicate;
 import io.kommunicate.callbacks.KMLoginHandler;
 import io.kommunicate.callbacks.KMStartChatHandler;
@@ -173,8 +171,36 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
             try {
                 final JSONObject jsonObject = new JSONObject(data.getString(0));
 
-                KmConversationBuilder conversationBuilder = (KmConversationBuilder) GsonUtils.getObjectFromJson(GsonUtils.getJsonFromObject(jsonObject, JSONObject.class), KmConversationBuilder.class);
+                KMUser kmUser = null;
+                Map<String, String> messageMetadata = null;
+                Map<String, String> conversationMetadata = null;
+
+                if (jsonObject.has("kmUser")) {
+                    kmUser = (KMUser) GsonUtils.getObjectFromJson(jsonObject.getString("kmUser"), KMUser.class);
+                    jsonObject.remove("kmUser");
+                }
+
+                if (jsonObject.has("metadata")) {
+                    messageMetadata = (Map<String, String>) GsonUtils.getObjectFromJson(jsonObject.getString("metadata"), Map.class);
+                    jsonObject.remove("metadata");
+                }
+
+                if (jsonObject.has("messageMetadata")) {
+                    messageMetadata = (Map<String, String>) GsonUtils.getObjectFromJson(jsonObject.getString("messageMetadata"), Map.class);
+                    jsonObject.remove("messageMetadata");
+                }
+
+                if (jsonObject.has("conversationMetadata")) {
+                    conversationMetadata = (Map<String, String>) GsonUtils.getObjectFromJson(jsonObject.getString("conversationMetadata"), Map.class);
+                    jsonObject.remove("conversationMetadata");
+                }
+
+                KmConversationBuilder conversationBuilder = (KmConversationBuilder) GsonUtils.getObjectFromJson(jsonObject.toString(), KmConversationBuilder.class);
                 conversationBuilder.setContext(cordova.getActivity());
+
+                conversationBuilder.setKmUser(kmUser);
+                conversationBuilder.setMessageMetadata(messageMetadata);
+                conversationBuilder.setConversationMetadata(conversationMetadata);
 
                 if (jsonObject.has("isUnique")) {
                     conversationBuilder.setSingleConversation(jsonObject.getBoolean("isUnique"));
@@ -184,10 +210,6 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
 
                 if (!jsonObject.has("skipConversationList")) {
                     conversationBuilder.setSkipConversationList(true);
-                }
-
-                if (jsonObject.has("metadata")) {
-                    conversationBuilder.setMessageMetadata((Map<String, String>) GsonUtils.getObjectFromJson(jsonObject.getString("metadata"), Map.class));
                 }
 
                 if (jsonObject.has("launchAndCreateIfEmpty") && jsonObject.getBoolean("launchAndCreateIfEmpty")) {
