@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         id="kommunicate-cordova-plugin"
         xmlns:tools="http://schemas.android.com/tools"
-        version="0.5.0">
+        version="0.6.0">
 
   <name>Kommunicate</name>
   
@@ -46,7 +46,7 @@
 
   <platform name="ios">
         <pods-config ios-min-version="10.0" use-frameworks="true"/>
-        <pod name="Kommunicate" version="3.0.0"/>
+        <pod name="Kommunicate" version="5.7.1"/>
         
         <config-file target="config.xml" parent="/*">
           <feature name="KommunicateCordovaPlugin">
