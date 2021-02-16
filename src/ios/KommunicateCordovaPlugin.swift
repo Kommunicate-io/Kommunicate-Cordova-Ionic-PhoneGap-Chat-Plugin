@@ -232,15 +232,16 @@ import Applozic
     
     @objc(conversationBuilder:)
     func conversationBuilder(command: CDVInvokedUrlCommand) {
-        var pluginResult = CDVPluginResult(
-            status: CDVCommandStatus_ERROR
-        )
-        self.command = command;
+        self.command = command
         self.isUnique = true
-        self.createOnly = false;
-        self.launchAndCreateIfEmpty = false;
-        self.agentIds = [];
-        self.botIds = [];
+        self.createOnly = false
+        self.launchAndCreateIfEmpty = false
+        self.skipConversationList = false
+        self.conversationAssignee = nil
+        self.clientConversationId = nil
+        self.teamId = nil
+        self.agentIds = []
+        self.botIds = []
         
         let jsonStr = command.arguments[0] as? String ?? ""
         let data = jsonStr.data(using: .utf8)!
@@ -261,44 +262,30 @@ import Applozic
                 
                 if jsonObj["isSingleConversation"] != nil {
                     self.isUnique = jsonObj["isSingleConversation"] as! Bool
-                } else {
-                    self.isUnique = true
                 }
                 
                 if (jsonObj["createOnly"] != nil) {
                     self.createOnly = jsonObj["createOnly"] as! Bool
-                } else {
-                    self.createOnly = false
                 }
                 
                 if (jsonObj["launchAndCreateIfEmpty"] != nil) {
                     self.launchAndCreateIfEmpty = jsonObj["launchAndCreateIfEmpty"] as! Bool
-                } else {
-                    self.launchAndCreateIfEmpty = false
                 }
                 
                 if (jsonObj["skipConversationList"] != nil) {
                     self.skipConversationList = jsonObj["skipConversationList"] as! Bool
-                } else {
-                    self.skipConversationList = false
                 }
                 
                 if (jsonObj["conversationAssignee"] != nil) {
                     self.conversationAssignee = jsonObj["conversationAssignee"] as? String
-                } else {
-                    self.conversationAssignee = nil
                 }
 
                 if (jsonObj["clientConversationId"] != nil) {
                     self.clientConversationId = jsonObj["clientConversationId"] as? String
-                } else {
-                    self.clientConversationId = nil
                 }
                 
                 if jsonObj["teamId"] != nil {
                     self.teamId = jsonObj["teamId"] as? String
-                } else {
-                    self.teamId = nil
                 }
                 
                 if let metadataStrData = (jsonObj["metadata"] as? String)?.data(using: .utf8) {
@@ -310,11 +297,8 @@ import Applozic
                 let json = try? JSONSerialization.jsonObject(with: data, options: [])
                 
                 if let dictionary = json as? [String: Any] {
-                    let agentIds = dictionary["agentIds"] as? [String]
-                    let botIds = dictionary["botIds"] as? [String]
-                    
-                    self.agentIds = agentIds
-                    self.botIds = botIds
+                    self.agentIds = dictionary["agentIds"] as? [String]
+                    self.botIds = dictionary["botIds"] as? [String]
                     
                     if Kommunicate.isLoggedIn {
                         self.handleCreateConversation()
@@ -339,14 +323,7 @@ import Applozic
                             Kommunicate.registerUser(kmUser!, completion: {
                                 response, error in
                                 guard error == nil else {
-                                    pluginResult = CDVPluginResult(
-                                        status: CDVCommandStatus_ERROR,
-                                        messageAs: error?.description
-                                    )
-                                    self.commandDelegate!.send(
-                                        pluginResult,
-                                        callbackId: command.callbackId
-                                    )
+                                    self.sendErrorResult(errorResult: error?.description)
                                     return
                                 }
                                 self.handleCreateConversation()
@@ -359,14 +336,7 @@ import Applozic
                     }
                 }
             } } catch _ as NSError {
-                pluginResult = CDVPluginResult(
-                    status: CDVCommandStatus_ERROR,
-                    messageAs: "Failed")
-                
-                self.commandDelegate!.send(
-                    pluginResult,
-                    callbackId: command.callbackId
-                )
+                self.sendErrorResult(errorResult: nil)
         }
     }
     
