@@ -10,13 +10,14 @@ import Applozic
     var createOnly: Bool = false;
     var isUnique: Bool = true;
     var launchAndCreateIfEmpty: Bool = false;
+    var skipConversationList: Bool = false;
+    var teamId: String? = nil
+    var conversationAssignee: String? = nil
+    var clientConversationId: String? = nil
     
     @objc (login:)
     func login(command: CDVInvokedUrlCommand) {
-        var pluginResult = CDVPluginResult(
-            status: CDVCommandStatus_ERROR
-        )
-        
+        self.command = command;
         var jsonStr = command.arguments[0] as? String ?? ""
         jsonStr = jsonStr.replacingOccurrences(of: "\\\"", with: "\"")
         jsonStr = "\(jsonStr)"
@@ -28,83 +29,42 @@ import Applozic
         Kommunicate.registerUser(kmUser!, completion: {
             response, error in
             guard error == nil else {
-                pluginResult = CDVPluginResult(
-                    status: CDVCommandStatus_ERROR,
-                    messageAs: error?.description
-                )
-                self.commandDelegate!.send(
-                    pluginResult,
-                    callbackId: command.callbackId
-                )
+                self.sendErrorResult(errorResult: error?.description)
                 return
             }
             
             let postdata: Data? = try? JSONSerialization.data(withJSONObject: response?.dictionary()! ?? [:], options: [])
             let jsonString = String(data: postdata!, encoding: String.Encoding.utf8)
-            pluginResult = CDVPluginResult(
-                status: CDVCommandStatus_OK,
-                messageAs: jsonString
-            )
-            
-            self.commandDelegate!.send(
-                pluginResult,
-                callbackId: command.callbackId
-            )
+            self.sendSuccessResult(successResult: jsonString)
         })
     }
     
     @objc (isLoggedIn:)
     func isLoggedIn(command: CDVInvokedUrlCommand) {
-        var pluginResult = CDVPluginResult(
-            status: CDVCommandStatus_ERROR
-        )
-        
+        self.command = command;
         var msg = "false"
         
         if Kommunicate.isLoggedIn {
             msg = "true"
         }
         
-        pluginResult = CDVPluginResult(
-            status: CDVCommandStatus_OK,
-            messageAs: msg
-        )
-        
-        self.commandDelegate!.send(
-            pluginResult,
-            callbackId: command.callbackId
-        )
+        self.sendSuccessResult(successResult: msg)
     }
     
     @objc (launchConversation:)
     func launchConversation(command: CDVInvokedUrlCommand) {
-        var pluginResult = CDVPluginResult(
-            status: CDVCommandStatus_ERROR
-        )
-        
-        if let top = UIApplication.topViewController() {
+       self.command = command;
+       if let top = UIApplication.topViewController() {
             Kommunicate.showConversations(from: top)
-            pluginResult = CDVPluginResult(
-                status: CDVCommandStatus_OK,
-                messageAs: "Success")
+            self.sendSuccessResult(successResult: nil)
         } else {
-            pluginResult = CDVPluginResult(
-                status: CDVCommandStatus_ERROR,
-                messageAs: "Failed")
+            self.sendErrorResult(errorResult: nil)
         }
-        
-        self.commandDelegate!.send(
-            pluginResult,
-            callbackId: command.callbackId
-        )
     }
     
     @objc (launchParticularConversation:)
     func launchParticularConversation(command: CDVInvokedUrlCommand) {
-        var pluginResult = CDVPluginResult(
-            status: CDVCommandStatus_ERROR
-        )
-        
+        self.command = command;
         let jsonStr = command.arguments[0] as? String ?? ""
         
         let data = jsonStr.data(using: .utf8)!
@@ -112,32 +72,17 @@ import Applozic
         
         if let dictionary = json as? [String: Any] {
             guard let groupId = dictionary["clientChannelKey"] as? String else {
-                pluginResult = CDVPluginResult(
-                    status: CDVCommandStatus_ERROR,
-                    messageAs: "Failed")
-                
-                self.commandDelegate!.send(
-                    pluginResult,
-                    callbackId: command.callbackId
-                )
+                self.sendErrorResult(errorResult: nil)
                 return
             }
             
-            self.launchChatWithClientGroupId(clientGroupId: groupId)
-            pluginResult = CDVPluginResult(
-                status: CDVCommandStatus_OK,
-                messageAs: "Success")
-            
-            self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
+        self.openParticularConversation(groupId)
         }
     }
     
     @objc (startNewConversation:)
     func startNewConversation(command: CDVInvokedUrlCommand) {
-        var pluginResult = CDVPluginResult(
-            status: CDVCommandStatus_ERROR
-        )
-        
+        self.command = command;
         let jsonStr = command.arguments[0] as? String ?? ""
         
         
@@ -146,14 +91,7 @@ import Applozic
         
         if let dictionary = json as? [String: Any] {
             guard let agentId = dictionary["agentIds"] as? [String] else {
-                pluginResult = CDVPluginResult(
-                    status: CDVCommandStatus_ERROR,
-                    messageAs: "Error, agent id must not be empty")
-                
-                self.commandDelegate!.send(
-                    pluginResult,
-                    callbackId: command.callbackId
-                )
+                self.sendErrorResult(errorResult: "Error, agent id must not be empty")
                 return
             }
             let botIds = dictionary["botIds"] as? [String]
@@ -162,34 +100,17 @@ import Applozic
                                            agentIds: agentId,
                                            botIds: botIds,
                                            completion: { response in guard !response.isEmpty else {
-                                            pluginResult = CDVPluginResult(
-                                                status: CDVCommandStatus_ERROR,
-                                                messageAs: "Error")
-                                            
-                                            self.commandDelegate!.send(
-                                                pluginResult,
-                                                callbackId: command.callbackId
-                                            )
+                                            self.sendErrorResult(errorResult: nil)
                                             return
                                             }
                                             
-                                            pluginResult = CDVPluginResult(
-                                                status: CDVCommandStatus_OK,
-                                                messageAs: response)
-                                            
-                                            self.commandDelegate!.send(
-                                                pluginResult,
-                                                callbackId: command.callbackId
-                                            )
+                                           self.sendSuccessResult(successResult: response)
             }) }
     }
     
     @objc (startOrGetConversation:)
     func startOrGetConversation(command: CDVInvokedUrlCommand) {
-        var pluginResult = CDVPluginResult(
-            status: CDVCommandStatus_ERROR
-        )
-        
+        self.command = command;
         let jsonStr = command.arguments[0] as? String ?? ""
         
         
@@ -198,14 +119,7 @@ import Applozic
         
         if let dictionary = json as? [String: Any] {
             guard let agentId = dictionary["agentIds"] as? [String] else {
-                pluginResult = CDVPluginResult(
-                    status: CDVCommandStatus_ERROR,
-                    messageAs: "Error, agent id must not be empty")
-                
-                self.commandDelegate!.send(
-                    pluginResult,
-                    callbackId: command.callbackId
-                )
+                self.sendErrorResult(errorResult: "Error, agent id must not be empty")
                 return
             }
             let botIds = dictionary["botIds"] as? [String]
@@ -215,51 +129,29 @@ import Applozic
                                            botIds: botIds,
                                            useLastConversation: true,
                                            completion: { response in guard !response.isEmpty else {
-                                            pluginResult = CDVPluginResult(
-                                                status: CDVCommandStatus_ERROR,
-                                                messageAs: "Error")
-                                            
-                                            self.commandDelegate!.send(
-                                                pluginResult,
-                                                callbackId: command.callbackId
-                                            )
+                                            self.sendErrorResult(errorResult: nil)
                                             return
                                             }
                                             
-                                            pluginResult = CDVPluginResult(
-                                                status: CDVCommandStatus_OK,
-                                                messageAs: response)
-                                            
-                                            self.commandDelegate!.send(
-                                                pluginResult,
-                                                callbackId: command.callbackId
-                                            )
+                                           self.sendSuccessResult(successResult: response)
             }) }
     }
     
     @objc (logout:)
     func logout(command: CDVInvokedUrlCommand) {
-        var pluginResult = CDVPluginResult(
-            status: CDVCommandStatus_ERROR
-        )
-        
-        Kommunicate.logoutUser()
-        
-        pluginResult = CDVPluginResult(
-            status: CDVCommandStatus_OK,
-            messageAs: "Success")
-        
-        self.commandDelegate!.send(
-            pluginResult,
-            callbackId: command.callbackId
-        )
+        self.command = command;
+        Kommunicate.logoutUser { (logoutResult) in
+                        switch logoutResult {
+                        case .success(_):
+                            self.sendSuccessResult(successResult: "Logout success")
+                        case .failure( _):
+                            self.sendErrorResult(errorResult: "Error in logout")
+                    }
+            }
     }
     
     @objc (startSingleChat:)
     func startSingleChat(command: CDVInvokedUrlCommand) {
-        var pluginResult = CDVPluginResult(
-            status: CDVCommandStatus_ERROR
-        )
         self.command = command;
         self.isUnique = true
         self.createOnly = false;
@@ -290,14 +182,7 @@ import Applozic
                 
                 if let dictionary = json as? [String: Any] {
                     guard let agentIds = dictionary["agentIds"] as? [String] else {
-                        pluginResult = CDVPluginResult(
-                            status: CDVCommandStatus_ERROR,
-                            messageAs: "Error, agent id must not be empty")
-                        
-                        self.commandDelegate!.send(
-                            pluginResult,
-                            callbackId: command.callbackId
-                        )
+                        self.sendErrorResult(errorResult: "Error, agent id must not be empty")
                         return
                     }
                     let botIds = dictionary["botIds"] as? [String]
@@ -328,14 +213,7 @@ import Applozic
                             Kommunicate.registerUser(kmUser!, completion: {
                                 response, error in
                                 guard error == nil else {
-                                    pluginResult = CDVPluginResult(
-                                        status: CDVCommandStatus_ERROR,
-                                        messageAs: error?.description
-                                    )
-                                    self.commandDelegate!.send(
-                                        pluginResult,
-                                        callbackId: command.callbackId
-                                    )
+                                    self.sendErrorResult(errorResult: error?.description)
                                     return
                                 }
                                 self.handleCreateConversation()
@@ -348,14 +226,7 @@ import Applozic
                     }
                 }
             } } catch _ as NSError {
-                pluginResult = CDVPluginResult(
-                    status: CDVCommandStatus_ERROR,
-                    messageAs: "Failed")
-                
-                self.commandDelegate!.send(
-                    pluginResult,
-                    callbackId: command.callbackId
-                )
+                self.sendErrorResult(errorResult: nil)
         }
     }
     
@@ -388,16 +259,46 @@ import Applozic
                     withPrechat = jsonObj["withPreChat"] as! Bool
                 }
                 
-                if jsonObj["isUnique"] != nil {
-                    self.isUnique = jsonObj["isUnique"] as! Bool
+                if jsonObj["isSingleConversation"] != nil {
+                    self.isUnique = jsonObj["isSingleConversation"] as! Bool
+                } else {
+                    self.isUnique = true
                 }
                 
-                if(jsonObj["createOnly"] != nil) {
+                if (jsonObj["createOnly"] != nil) {
                     self.createOnly = jsonObj["createOnly"] as! Bool
+                } else {
+                    self.createOnly = false
                 }
                 
-                if(jsonObj["launchAndCreateIfEmpty"] != nil) {
+                if (jsonObj["launchAndCreateIfEmpty"] != nil) {
                     self.launchAndCreateIfEmpty = jsonObj["launchAndCreateIfEmpty"] as! Bool
+                } else {
+                    self.launchAndCreateIfEmpty = false
+                }
+                
+                if (jsonObj["skipConversationList"] != nil) {
+                    self.skipConversationList = jsonObj["skipConversationList"] as! Bool
+                } else {
+                    self.skipConversationList = false
+                }
+                
+                if (jsonObj["conversationAssignee"] != nil) {
+                    self.conversationAssignee = jsonObj["conversationAssignee"] as? String
+                } else {
+                    self.conversationAssignee = nil
+                }
+
+                if (jsonObj["clientConversationId"] != nil) {
+                    self.clientConversationId = jsonObj["clientConversationId"] as? String
+                } else {
+                    self.clientConversationId = nil
+                }
+                
+                if jsonObj["teamId"] != nil {
+                    self.teamId = jsonObj["teamId"] as? String
+                } else {
+                    self.teamId = nil
                 }
                 
                 if let metadataStrData = (jsonObj["metadata"] as? String)?.data(using: .utf8) {
@@ -471,11 +372,9 @@ import Applozic
     
     @objc(updateChatContext:)
     func updateChatContext(command: CDVInvokedUrlCommand) {
+        self.command = command;
         let jsonStr = command.arguments[0] as? String ?? ""
-        
-        var pluginResult = CDVPluginResult(
-            status: CDVCommandStatus_ERROR
-        )
+    
         do {
             let data = jsonStr.data(using: .utf8)!
             guard let chatContext = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? Dictionary<String, Any> else {
@@ -483,32 +382,19 @@ import Applozic
             }
             if(Kommunicate.isLoggedIn) {
                 try Kommunicate.defaultConfiguration.updateChatContext(with: chatContext)
-                pluginResult = CDVPluginResult(
-                    status: CDVCommandStatus_OK,
-                    messageAs: "Success")
+                self.sendSuccessResult(successResult: nil)
             } else {
-                pluginResult = CDVPluginResult(
-                    status: CDVCommandStatus_ERROR,
-                    messageAs: "User not authorised. This usually happens when calling the function before conversationBuilder or loginUser. Make sure you call either of the two functions before updating the chatContext")
+                self.sendErrorResult(errorResult: "User not authorised. This usually happens when calling the function before conversationBuilder or loginUser. Make sure you call either of the two functions before updating the chatContext")
             }
         } catch  {
             print(error)
-            pluginResult = CDVPluginResult(
-                status: CDVCommandStatus_ERROR,
-                messageAs: error.localizedDescription)
+            self.sendErrorResult(errorResult: error.localizedDescription)
         }
-        self.commandDelegate.send(
-            pluginResult,
-            callbackId: command.callbackId
-        )
     }
     
-    func createAndShowConversation(
+    func launchAndCreateIfEmpty (
         from viewController: UIViewController,
         completion: @escaping (_ error: Kommunicate.KommunicateError?) -> ()) {
-        var pluginResult = CDVPluginResult(
-            status: CDVCommandStatus_ERROR
-        )
         
         let applozicClient = ApplozicClient(applicationKey: KMUserDefaultHandler.getApplicationKey())
         applozicClient?.getLatestMessages(false, withCompletionHandler: {
@@ -519,41 +405,25 @@ import Applozic
             if let messages = messageList, messages.count > 0, error == nil {
                 if messages.count == 1,
                     let message = messages[0] as? ALMessage,
-                    let groupId = message.groupId {
+                    let _ = message.groupId {
                     let alChannelService = ALChannelService()
                     alChannelService.getChannelInformation(message.groupId, orClientChannelKey: nil) { (channel) in
                         guard let channel = channel, let key = channel.clientChannelKey else {
-                            //                                completionHandler(false)
-                            // handle error
+                            self.sendErrorResult(errorResult: nil)
                             return
                         }
-                        self.openConversationWithList(response: key, viewController: viewController)
+                        if self.skipConversationList {
+                            self.openParticularConversation(key)
+                        } else {
+                            self.openConversationWithList(response: key, viewController: viewController)
+                        }
                     }
                 } else if messages.count > 1 {
                     Kommunicate.showConversations(from: viewController)
-                    completion(nil)
+                    self.sendSuccessResult(successResult: nil)
                 }
             } else {
-                Kommunicate.createConversation(userId: KMUserDefaultHandler.getUserId() ?? "",
-                                               agentIds: self.agentIds ?? [],
-                                               botIds: self.botIds,
-                                               useLastConversation: false,
-                                               completion: { response in
-                                                guard !response.isEmpty else {
-                                                    pluginResult = CDVPluginResult(
-                                                        status: CDVCommandStatus_ERROR,
-                                                        messageAs: "Error")
-                                                    
-                                                    self.commandDelegate!.send(
-                                                        pluginResult,
-                                                        callbackId: self.command!.callbackId
-                                                    )
-                                                    return
-                                                }
-                                                // put this in the else part
-                                                // First create conversation using create method then launch like this:
-                                                self.openConversationWithList(response: response, viewController: viewController)
-                })
+                self.processConversationBuilder(openWithList: !self.skipConversationList)
             }
         })
     }
@@ -580,52 +450,60 @@ import Applozic
     }
     
     func handleCreateConversation() {
-        var pluginResult = CDVPluginResult(
-            status: CDVCommandStatus_ERROR
-        )
-        
-        if(self.launchAndCreateIfEmpty) {
-            createAndShowConversation(from: UIApplication.topViewController()!, completion: {
+        if self.launchAndCreateIfEmpty {
+            self.launchAndCreateIfEmpty(from: UIApplication.topViewController()!, completion: {
                 error in
                 if let error = error {
                     print("Error while create/show: ", error)
                 }
             })
         } else {
-            Kommunicate.createConversation(userId: KMUserDefaultHandler.getUserId() ?? "",
-                                           agentIds: self.agentIds ?? [],
-                                           botIds: self.botIds,
-                                           useLastConversation: self.isUnique,
-                                           completion: { response in guard !response.isEmpty else {
-                                            pluginResult = CDVPluginResult(
-                                                status: CDVCommandStatus_ERROR,
-                                                messageAs: "Error")
-                                            
-                                            self.commandDelegate!.send(
-                                                pluginResult,
-                                                callbackId: self.command!.callbackId
-                                            )
-                                            return
-                                            }
-                                            
-                                            if self.createOnly {
-                                                pluginResult = CDVPluginResult(
-                                                    status: CDVCommandStatus_OK,
-                                                    messageAs: response
-                                                )
-                                            } else {
-                                                self.launchChatWithClientGroupId(clientGroupId: response)
-                                                pluginResult = CDVPluginResult(
-                                                    status: CDVCommandStatus_OK,
-                                                    messageAs: "Success"
-                                                )
-                                            }
-                                            
-                                            self.commandDelegate!.send(
-                                                pluginResult,
-                                                callbackId: self.command!.callbackId
-                                            )
-            }) }
+            processConversationBuilder(openWithList: false)
+        }
+    }
+    
+    func processConversationBuilder(openWithList: Bool) {
+            let builder = KMConversationBuilder();
+
+            if let agentIds = self.agentIds, !agentIds.isEmpty {
+                builder.withAgentIds(agentIds)
+            }
+
+            if let botIds = self.botIds, !botIds.isEmpty {
+                builder.withBotIds(botIds)
+            }
+
+            builder.useLastConversation(self.isUnique)
+
+            if let assignee = self.conversationAssignee {
+                builder.withConversationAssignee(assignee)
+            }
+
+            if let clientConversationId = self.clientConversationId {
+                builder.withClientConversationId(clientConversationId)
+            }
+            
+            if let teamId = self.teamId {
+                builder.withTeamId(teamId)
+            }
+
+            Kommunicate.createConversation(conversation: builder.build(),
+                                                   completion: { response in
+                                                    switch response {
+                                                    case .success(let conversationId):
+                                                        if self.createOnly {
+                                                            self.sendSuccessResult(successResult: conversationId)
+                                                        } else {
+                                                            if openWithList {
+                                                                self.openConversationWithList(response: conversationId, viewController: UIApplication.topViewController()!)
+                                                            } else {
+                                                                self.openParticularConversation(conversationId)
+                                                            }
+                                                        }
+                                                    case .failure(let error):
+                                                        self.sendErrorResult(errorResult: error.errorDescription)
+                                                    }
+                                                })
     }
     
     @objc (registerPushNotification:)
@@ -633,12 +511,41 @@ import Applozic
         
     }
     
-    func launchChatWithClientGroupId(clientGroupId: String?) {
+    func sendSuccessResult(successResult: String?) {
+        let pluginResult = CDVPluginResult(
+            status: CDVCommandStatus_OK,
+            messageAs: successResult != nil ? successResult : "Success")
+        
+        self.commandDelegate!.send(
+            pluginResult,
+            callbackId: self.command!.callbackId
+        )
+    }
+    
+    func sendErrorResult(errorResult: String?) {
+        let pluginResult = CDVPluginResult(
+            status: CDVCommandStatus_ERROR,
+            messageAs: errorResult != nil ? errorResult : "Error")
+        
+        self.commandDelegate!.send(
+            pluginResult,
+            callbackId: self.command!.callbackId
+        )
+    }
+    
+    func openParticularConversation(_ conversationId: String) -> Void {
         DispatchQueue.main.async {
-            Kommunicate.showConversationWith(groupId: clientGroupId!, from: UIApplication.topViewController()!) { (result) in
-                print(result)
-            }
-        }
+                if let top = UIApplication.topViewController() {
+                    Kommunicate.showConversationWith(groupId: conversationId, from: top, completionHandler: ({ (shown) in
+                        if (shown) {
+                            self.sendSuccessResult(successResult: conversationId)
+                        } else {
+                            self.sendErrorResult(errorResult: "Failed to launch conversation with conversationId : " + conversationId)
+                        }
+                    }))
+                } else {
+                 self.sendErrorResult(errorResult: "Failed to launch conversation with conversationId : " + conversationId)
+            }}
     }
     
     func closeButtonTapped() {
@@ -647,9 +554,7 @@ import Applozic
     
     func userSubmittedResponse(name: String, email: String, phoneNumber: String) {
         viewController.dismiss(animated: false, completion: nil)
-        var pluginResult = CDVPluginResult(
-            status: CDVCommandStatus_ERROR
-        )
+    
         let kmUser = KMUser.init()
         guard let applicationKey = appId else {
             return
@@ -670,14 +575,7 @@ import Applozic
         Kommunicate.registerUser(kmUser, completion: {
             response, error in
             guard error == nil else {
-                pluginResult = CDVPluginResult(
-                    status: CDVCommandStatus_ERROR,
-                    messageAs: error?.description
-                )
-                self.commandDelegate!.send(
-                    pluginResult,
-                    callbackId: self.command?.callbackId
-                )
+                self.sendErrorResult(errorResult: error?.description)
                 return
             }
             
