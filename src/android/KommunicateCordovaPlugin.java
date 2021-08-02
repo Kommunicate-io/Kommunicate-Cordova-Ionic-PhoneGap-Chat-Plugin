@@ -209,7 +209,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                 conversationBuilder.setMessageMetadata(messageMetadata);
                 conversationBuilder.setConversationMetadata(conversationMetadata);
 
-                if (jsonObject.has("isSingleConversation")) {
+                if (jsonObject.has("isUnique") || jsonObject.has("isSingleConversation")) {
                     conversationBuilder.setSingleConversation(jsonObject.getBoolean("isSingleConversation"));
                 } else {
                     conversationBuilder.setSingleConversation(true);
@@ -226,11 +226,11 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                             if (e == null) {
                                 if (messageList.isEmpty()) {
                                     conversationBuilder.setSkipConversationList(isSkipConversationList(jsonObject));
-                                    conversationBuilder.launchConversation(getLaunchChatCallback(callback));
+                                    conversationBuilder.launchConversation(getLaunchChatCallback(callback, context));
                                 } else if (messageList.size() == 1) {
-                                    openParticularConversation(cordova.getActivity(), isSkipConversationList(jsonObject), messageList.get(0).getGroupId(), getLaunchChatCallback(callback));
+                                    openParticularConversation(cordova.getActivity(), isSkipConversationList(jsonObject), messageList.get(0).getGroupId(), getLaunchChatCallback(callback, context));
                                 } else {
-                                    Kommunicate.openConversation(cordova.getActivity(), getLaunchChatCallback(callback));
+                                    Kommunicate.openConversation(cordova.getActivity(), getLaunchChatCallback(callback, context));
                                 }
                             }
                         }
@@ -249,7 +249,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                         }
                     });
                 } else {
-                    conversationBuilder.launchConversation(getLaunchChatCallback(callback));
+                    conversationBuilder.launchConversation(getLaunchChatCallback(callback, context));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -385,11 +385,12 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
         return newMap;
     }
 
-    private KmCallback getLaunchChatCallback(CallbackContext callback) {
+    private KmCallback getLaunchChatCallback(CallbackContext callback, Context context) {
         return new KmCallback() {
             @Override
             public void onSuccess(Object message) {
-                callback.success(message != null ? message.toString() : "Success");
+                Integer conversationId = (Integer) message;
+                callback.success(ChannelService.getInstance(context).getChannel(conversationId).getClientGroupId());
             }
 
             @Override
@@ -406,7 +407,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
             intent.putExtra(KmConstants.TAKE_ORDER, skipConversationList);
             context.startActivity(intent);
             if (callback != null) {
-                callback.onSuccess(conversationId);
+                callback.onSuccess(ChannelService.getInstance(context).getChannel(conversationId).getClientGroupId());
             }
         } catch (ClassNotFoundException e) {
             if (callback != null) {
