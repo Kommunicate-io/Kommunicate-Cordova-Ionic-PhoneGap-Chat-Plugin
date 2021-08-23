@@ -2,6 +2,9 @@
 
 Open Source Cordova Live Chat SDK for Ionic and PhoneGap apps
 
+![Chat_Widget_Customization.png](src/Kommunicate-App.png "Kommunicate-Cordova-Ionic-App")
+
+
 # Overview
 Kommunicate provides open source live chat sdk in cordova which works with both Ionic and PhoneGap apps. Kommunicate lets you add real time live chat, in-app messaging and bot integration in your mobile applications and website for customer support.
 Refer to the official docs here: https://docs.kommunicate.io/docs/cordova-installation
@@ -144,6 +147,36 @@ For sample code you can refer to our sample app made in ionic3 https://github.co
 ### Following is the UI to create the BOT
 
 ![Kompose](https://user-images.githubusercontent.com/38066371/87527229-71d86080-c6a9-11ea-8a2c-467c99badac9.jpeg)
+
+
+
+## Dialogflow chatbot integration in your Cordova (Ionic/PhoneGap) SDK 
+
+Dialogflow is a Google-owned NLP platform to facilitate human-computer interactions such as chatbots, voice bots, etc. 
+
+Kommunicate's Dialogflow integration provides a more versatile, customizable and better chatting experience. Kommunicate Cordova (Ionic/PhoneGap) Live Chat SDK supports all of Dialogflow's features such as Google Assistant, Rich Messaging, etc. On top of that, it is equipped with advanced features such as bot-human handoff, conversation managing dashboard, reporting, and others. 
+
+You can connect your Dialogflow chatbot with Kommunicate in the following 4 simple steps. 
+
+### Step 1: Get your API credentials from Dialogflow
+- Login to Dialogflow console and select your agent from the dropdown in the left panel.
+- Click on the settings button. It will open a setting page for the agent.
+- Inside the general tab search for GOOGLE PROJECTS and click on your service account.
+- After getting redirected to your SERVICE ACCOUNT, create a key in JSON format for your project from the actions section and it will get automatically downloaded.
+
+### Step 2: Create a free Kommunicate account
+Create a free account on [Kommunicate](https://dashboard.kommunicate.io/signup) and navigate to the [Bots section](https://dashboard.kommunicate.io/bots/bot-integrations).
+
+### Step 3: Integrate your Dialogflow chatbot with Kommunicate
+- In the Bot integrations section, choose Dialogflow. A popup window will open.
+- Upload your Key file here and proceed.
+- Give a name and image to your chatbot. It will be visible to the users chatting with your chatbot.
+- Enable/Disable chatbot to human handoff. If enabled, it will automatically assign conversations to humans in case the chatbot is not able to answer.
+
+### Step 4: Install the Kommunicate Cordova (Ionic/PhoneGap) Chat SDK to your app
+You can add the Kommunicate SDK in your Cordova (Ionic/PhoneGap) app easily. More information on how to integrate with your Cordova (Ionic/PhoneGap) app [https://docs.kommunicate.io/docs/cordova-installation). 
+
+> Note: Here's a [sample chatbot](https://docs.kommunicate.io/docs/bot-samples) for you to get started with Dialogflow. 
 
 
 
