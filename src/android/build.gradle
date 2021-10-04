@@ -1,3 +1,3 @@
 dependencies {
-	implementation 'io.kommunicate.sdk:kommunicateui:2.1.4'
+	implementation 'io.kommunicate.sdk:kommunicateui:2.2.2'
 }
