@@ -522,7 +522,7 @@ import Applozic
         viewController.dismiss(animated: false, completion: nil)
     }
     
-    func userSubmittedResponse(name: String, email: String, phoneNumber: String) {
+    func userSubmittedResponse(name: String, email: String, phoneNumber: String, password: String) {
         viewController.dismiss(animated: false, completion: nil)
     
         let kmUser = KMUser.init()
