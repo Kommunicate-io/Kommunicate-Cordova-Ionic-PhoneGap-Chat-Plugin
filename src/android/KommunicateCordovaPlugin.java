@@ -180,7 +180,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
 
                 KMUser kmUser = null;
                 Map<String, String> messageMetadata = null;
-                Map<String, String> conversationMetadata = null;
+                Map<String, String> conversationInfo = null;
 
                 if (jsonObject.has("kmUser")) {
                     kmUser = (KMUser) GsonUtils.getObjectFromJson(jsonObject.getString("kmUser"), KMUser.class);
@@ -197,9 +197,9 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
                     jsonObject.remove("messageMetadata");
                 }
 
-                if (jsonObject.has("conversationMetadata")) {
-                    conversationMetadata = (Map<String, String>) GsonUtils.getObjectFromJson(jsonObject.getString("conversationMetadata"), Map.class);
-                    jsonObject.remove("conversationMetadata");
+                if (jsonObject.has("conversationInfo")) {
+                    conversationInfo = (Map<String, String>) GsonUtils.getObjectFromJson(jsonObject.getString("conversationInfo"), Map.class);
+                    jsonObject.remove("conversationInfo");
                 }
 
                 KmConversationBuilder conversationBuilder = (KmConversationBuilder) GsonUtils.getObjectFromJson(jsonObject.toString(), KmConversationBuilder.class);
@@ -207,7 +207,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
 
                 conversationBuilder.setKmUser(kmUser);
                 conversationBuilder.setMessageMetadata(messageMetadata);
-                conversationBuilder.setConversationMetadata(conversationMetadata);
+                conversationBuilder.setConversationInfo(conversationInfo);
 
                 if (jsonObject.has("isUnique") || jsonObject.has("isSingleConversation")) {
                     conversationBuilder.setSingleConversation(jsonObject.getBoolean("isSingleConversation"));
