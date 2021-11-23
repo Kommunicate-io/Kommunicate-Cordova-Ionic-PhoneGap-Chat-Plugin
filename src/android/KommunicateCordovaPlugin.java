@@ -389,8 +389,7 @@ public class KommunicateCordovaPlugin extends CordovaPlugin {
         return new KmCallback() {
             @Override
             public void onSuccess(Object message) {
-                Integer conversationId = (Integer) message;
-                callback.success(ChannelService.getInstance(context).getChannel(conversationId).getClientGroupId());
+                callback.success(message != null ? message.toString() : "Success");
             }
 
             @Override
