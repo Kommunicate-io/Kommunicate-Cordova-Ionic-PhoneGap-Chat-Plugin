@@ -1,6 +1,6 @@
 import Kommunicate
-import ApplozicSwift
-import Applozic
+import KommunicateCore_iOS_SDK
+import KommunicateChatUI_iOS_SDK
 @objc(KommunicateCordovaPlugin) class KommunicateCordovaPlugin: CDVPlugin, KMPreChatFormViewControllerDelegate {
     
     var appId: String? = nil;
